@@ -3,9 +3,9 @@ from pathlib import Path
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'django-insecure-!s%ug$h))f^*k*swuy$1-fhe!y!e2^p$!$v)jp(%r9-nin4nru'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-DEBUG = True 
+DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
