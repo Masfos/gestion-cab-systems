@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalle de Orden</title>
+</head>
+<body>
+
+<h1>Detalle de Orden #{{ orden.id }}</h1>
+
+<hr>
+
+<h2>Datos del Cliente</h2>
+<p><strong>Nombre:</strong> {{ orden.cliente.nombre }}</p>
+<p><strong>Teléfono:</strong> {{ orden.cliente.telefono }}</p>
+<p><strong>Email:</strong> {{ orden.cliente.email }}</p>
+
+<hr>
+
+<h2>Datos del Vehículo</h2>
+<p><strong>Marca:</strong> {{ orden.vehiculo.marca }}</p>
+<p><strong>Modelo:</strong> {{ orden.vehiculo.modelo }}</p>
+<p><strong>Año:</strong> {{ orden.vehiculo.anio }}</p>
+<p><strong>Patente:</strong> {{ orden.vehiculo.patente }}</p>
+
+<hr>
+
+<h2>Información de la Orden</h2>
+<p><strong>Estado:</strong> {{ orden.estado }}</p>
+<p><strong>Descripción:</strong></p>
+<p>{{ orden.descripcion }}</p>
+
+<hr>
+
+{% if mostrar_log %}
+<h3>Registro de Actividad</h3>
+
+<p><strong>Creado por:</strong> {{ orden.creado_por }}</p>
+<p><strong>Fecha creación:</strong> {{ orden.fecha_creacion }}</p>
+
+<p><strong>Última modificación:</strong> {{ orden.fecha_modificacion }}</p>
+<p><strong>Modificado por:</strong> {{ orden.modificado_por }}</p>
+
+<hr>
+{% endif %}
+
+<h2>Materiales Utilizados</h2>
+
+{% if materiales %}
+    <ul>
+        {% for item in materiales %}
+            <li>
+                {{ item.material.nombre }} — Cantidad: {{ item.cantidad }}
+
+                <a href="{% url 'editar_material' item.id %}">Editar</a>
+
+                {% if mostrar_log %}
+                    | <a href="{% url 'eliminar_material' item.id %}">Eliminar</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay materiales registrados.</p>
+{% endif %}
+
+<a href="{% url 'agregar_material' orden.id %}">
+    Agregar Material
+</a>
+
+<hr>
+
+<h2>Imágenes Adjuntas</h2>
+
+{% if orden.imagenes.all %}
+    {% for imagen in orden.imagenes.all %}
+        <div style="margin-bottom: 15px;">
+            <img src="{{ imagen.imagen.url }}" width="400">
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No hay imágenes cargadas.</p>
+{% endif %}
+
+<hr>
+
+<h2>Subir Nuevas Imágenes</h2>
+
+<form method="post" action="{% url 'agregar_imagen' orden.id %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="imagen" multiple>
+    <button type="submit">Subir imágenes</button>
+</form>
+
+<br>
+<a href="{% url 'dashboard' %}">Volver al Dashboard</a>
+
+</body>
+</html>

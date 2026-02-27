@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Nómina de Empleados</h2>
+    <a href="{% url 'registrar_usuario' %}" class="btn btn-primary">➕ Registrar Nuevo Trabajador</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered align-middle">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>Usuario</th>
+                <th>Rol / Permisos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td><strong>{{ u.username }}</strong></td>
+                <td class="text-center">
+                    {% for group in u.groups.all %}
+                        <span class="badge bg-info text-dark">{{ group.name }}</span>
+                    {% empty %}
+                        <span class="badge bg-danger">Sin Rol</span>
+                    {% endfor %}
+                </td>
+                <td class="text-center">
+                    {% if u != request.user %}
+                    <a href="{% url 'eliminar_usuario' u.id %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Seguro que deseas eliminar este empleado?')">Eliminar</a>
+                    {% else %}
+                        <span class="text-muted small italic">(Sesión activa)</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Volver al Inicio</a>
+{% endblock %}

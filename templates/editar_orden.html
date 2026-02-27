@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Editar Orden #{{ orden.id }}</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <label>Agregar imágenes (puedes seleccionar varias)</label>
+    <input type="file" name="imagenes" multiple class="form-control">
+
+    <br>
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form>
+
+<hr>
+
+<h4>Imágenes actuales</h4>
+
+<div class="galeria">
+    {% for img in orden.imagenes.all %}
+        <div class="card-imagen">
+            <img src="{{ img.imagen.url }}">
+            <div class="acciones-imagen">
+                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-sm btn-info">Descargar</a>
+                <a href="{% url 'eliminar_imagen' img.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No hay imágenes aún.</p>
+    {% endfor %}
+</div>
+
+<br>
+<a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver</a>
+
+{% endblock %}

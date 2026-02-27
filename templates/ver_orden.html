@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Detalle Completo Orden #{{ orden.id }}</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Cliente</th>
+        <td>{{ orden.cliente.nombre }}</td>
+    </tr>
+    <tr>
+        <th>Vehículo</th>
+        <td>{{ orden.vehiculo.modelo }}</td>
+    </tr>
+    <tr>
+        <th>Patente</th>
+        <td>{{ orden.vehiculo.patente }}</td>
+    </tr>
+    <tr>
+        <th>Estado</th>
+        <td>{{ orden.estado }}</td>
+    </tr>
+    <tr>
+        <th>Descripción</th>
+        <td>{{ orden.descripcion }}</td>
+    </tr>
+</table>
+
+<hr>
+
+<h4>Imágenes Adjuntas</h4>
+
+<div class="galeria">
+    {% for img in orden.imagenes.all %}
+        <div class="card-imagen">
+            <img src="{{ img.imagen.url }}">
+            <div class="acciones-imagen">
+                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-sm btn-info">Descargar</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No hay imágenes adjuntas.</p>
+    {% endfor %}
+</div>
+
+<br>
+
+<a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning">Editar</a>
+<a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver</a>
+
+{% endblock %}

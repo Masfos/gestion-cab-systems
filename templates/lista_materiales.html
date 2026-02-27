@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Inventario de Bodega</h2>
+
+<form method="GET" class="mb-3">
+    <input type="text" name="q" placeholder="Buscar material..."
+           value="{{ request.GET.q }}" class="form-control">
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre Material</th>
+            <th>Stock</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for material in materiales %}
+        <tr>
+            <td>{{ material.nombre }}</td>
+            <td>{{ material.stock }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">No hay materiales encontrados.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver</a>
+
+{% endblock %}

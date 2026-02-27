@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-5">
+        <div class="card bg-dark text-white border-secondary p-4 shadow">
+            <h3 class="text-center mb-4">Registro de Personal</h3>
+
+            {% if error %}
+                <div class="alert alert-danger py-2 small">⚠️ {{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Nombre de Usuario</label>
+                    <input type="text" name="username" class="form-control bg-secondary text-white border-0" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" name="password" class="form-control bg-secondary text-white border-0" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Rol del Empleado</label>
+                    <select name="grupo" class="form-select bg-secondary text-white border-0" required>
+                        <option value="" disabled selected>Elegir rol...</option>
+                        {% for grupo in grupos %}
+                            <option value="{{ grupo.id }}">{{ grupo.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Guardar Empleado</button>
+                    <a href="{% url 'lista_usuarios' %}" class="btn btn-outline-light btn-sm">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
