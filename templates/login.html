@@ -22,19 +22,18 @@
             padding: 40px;
             border-radius: 15px;
             width: 100%;
-            max-width: 400px; /* Asegura que se vea bien en móviles */
+            max-width: 400px;
             color: white;
             text-align: center;
             border: 1px solid #5a5860;
         }
 
         .logo-login {
-            width: 160px; /* Un poco más grande para que destaque */
+            width: 160px;
             height: auto;
             margin-bottom: 20px;
         }
 
-        /* Forzamos que los inputs de Django se vean como Bootstrap */
         input[type="text"], input[type="password"] {
             display: block;
             width: 100%;
@@ -96,12 +95,12 @@
             {% csrf_token %}
 
             <div class="mb-3 text-start">
-                <label class="form-label small text-secondary">Nombre de Usuario</label>
+                <label class="form-label small text-white">Nombre de Usuario</label>
                 {{ form.username }}
             </div>
 
             <div class="mb-4 text-start">
-                <label class="form-label small text-secondary">Contraseña</label>
+                <label class="form-label small text-white">Contraseña</label>
                 {{ form.password }}
             </div>
 
