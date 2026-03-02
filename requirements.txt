@@ -1,12 +1,5 @@
-﻿asgiref==3.11.0
-Django==5.0.14
+﻿Django==5.0.14
 gunicorn==23.0.0
-packaging==26.0
-sqlparse==0.5.5
-tzdata==2025.3
-dj-database-url
-psycopg2-binary
-gunicorn
 dj-database-url
 psycopg2-binary
 whitenoise
