@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-# Modelo para registrar los clientes de la empresa
+# Registro cliente
 class Cliente(models.Model):
     nombre = models.CharField(max_length=150)
     telefono = models.CharField(max_length=50, blank=True, null=True)
@@ -27,7 +27,7 @@ class Vehiculo(models.Model):
 
 # Orden de trabajo asociada a un vehículo y su cliente
 class OrdenTrabajo(models.Model):
-    # Estados posibles del ciclo de vida de una orden
+    # Estados de la orden
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente'),
         ('en_proceso', 'En Proceso'),
@@ -45,7 +45,6 @@ class OrdenTrabajo(models.Model):
         default='pendiente'
     )
 
-    # Incluye diagnóstico, trabajos realizados y observaciones del técnico
     descripcion = models.TextField()
 
     creado_por = models.ForeignKey(
@@ -71,7 +70,7 @@ class OrdenTrabajo(models.Model):
         return f"Orden #{self.id} - {self.vehiculo.patente}"
 
 
-# Imágenes adjuntas a una orden (fotos del vehículo, trabajos, etc.)
+# Imágenes adjuntas
 class ImagenOrden(models.Model):
     orden = models.ForeignKey(OrdenTrabajo, on_delete=models.CASCADE, related_name="imagenes")
     imagen = models.ImageField(upload_to="ordenes/")
@@ -91,7 +90,7 @@ class Material(models.Model):
         return f"{self.nombre} (Stock: {self.stock})"
 
 
-# Registro de materiales utilizados en una orden específica
+# Registro de materiales utilizados en una orden
 class MaterialUsado(models.Model):
     orden = models.ForeignKey(
         'OrdenTrabajo',
