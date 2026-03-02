@@ -80,7 +80,7 @@ class ImagenOrden(models.Model):
         return f"Imagen de Orden #{self.orden.id}"
 
 
-# Materiales disponibles en bodega
+# Materiales en bodega
 class Material(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
