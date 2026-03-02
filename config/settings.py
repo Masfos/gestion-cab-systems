@@ -4,13 +4,14 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Seguridad
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-# Forzamos False en producción para evitar crashes raros
 DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.railway.app",
+]
 
 
 INSTALLED_APPS = [
@@ -58,7 +59,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Base de datos (funciona con Railway y también local si no hay DATABASE_URL)
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
@@ -74,7 +74,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -83,7 +82,6 @@ STATICFILES_DIRS = [
 ]
 
 
-# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
