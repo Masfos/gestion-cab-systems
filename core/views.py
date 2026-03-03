@@ -33,13 +33,14 @@ def editar_orden(request, orden_id):
         form = OrdenTrabajoForm(request.POST, request.FILES, instance=orden)
         if form.is_valid():
             form.save()
-            for archivo in request.FILES.getlist("imagenes"):
-                ImagenOrden.objects.create(orden=orden, imagen=archivo)
+            archivos = request.FILES.getlist('imagenes')
+            for f in archivos:
+                from .models import ImagenOrden
+                ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("ver_orden", orden_id=orden.id)
     else:
         form = OrdenTrabajoForm(instance=orden)
     return render(request, "editar_orden.html", {"form": form, "orden": orden})
-
 @login_required
 def eliminar_orden(request, orden_id):
     if request.method == "POST" and es_admin(request.user):

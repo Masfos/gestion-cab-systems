@@ -5,15 +5,16 @@ class OrdenTrabajoForm(forms.ModelForm):
     imagenes = forms.FileField(
         widget=forms.FileInput(attrs={
             'multiple': True, 
-            'class': 'form-control'
+            'class': 'form-control',
+            'accept': 'image/*'
         }),
         required=False,
-        label="Subir fotos"
+        label="Adjuntar Fotos"
     )
 
     class Meta:
         model = OrdenTrabajo
-        fields = '__all__'
+        fields = ['vehiculo', 'descripcion', 'estado']
 
 class ClienteForm(forms.ModelForm):
     class Meta:

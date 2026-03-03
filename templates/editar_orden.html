@@ -11,7 +11,6 @@
                     {% csrf_token %}
 
                     <style>
-
                         input[type="text"], input[type="file"], select, textarea {
                             display: block;
                             width: 100%;
@@ -22,86 +21,52 @@
                             border: 1px solid #6a6870 !important;
                             border-radius: 0.375rem;
                             margin-bottom: 1rem;
-                            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
                         }
-
-                        input:focus, select:focus, textarea:focus {
-                            background-color: #5a5860 !important;
-                            color: white !important;
-                            outline: none;
-                            border-color: #0d6efd;
-                            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+                        label {
+                            font-weight: bold;
+                            color: #adb5bd;
+                            margin-bottom: 5px;
+                            display: block;
                         }
-
-                        label { color: white; font-weight: bold; margin-bottom: 5px; display: block; }
-                        .preview-img { 
-                            width: 110px; height: 110px; object-fit: cover; 
-                            border-radius: 8px; border: 2px solid #0d6efd; margin: 8px;
-                            transition: transform 0.2s;
+                        .preview-img {
+                            width: 100px;
+                            height: 100px;
+                            object-fit: cover;
+                            border-radius: 8px;
+                            border: 2px solid #6a6870;
+                            margin: 5px;
                         }
-                        .preview-img:hover { transform: scale(1.1); }
-                        
-                        .galeria { display: flex; flex-wrap: wrap; gap: 15px; justify-content: start; }
-                        .card-imagen { background: #5a5860; border: 1px solid #6a6870; border-radius: 10px; width: 150px; text-align: center; padding: 5px; }
-                        .card-imagen img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
-                        .acciones-imagen { display: flex; flex-direction: column; gap: 5px; }
                     </style>
 
                     <div class="mb-3">
-                        <label>Cliente (Asignado)</label>
-                        {{ form.cliente }}
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Vehículo / Equipo</label>
+                        {{ form.vehiculo.label_tag }}
                         {{ form.vehiculo }}
                     </div>
 
                     <div class="mb-3">
-                        <label>Estado del Servicio</label>
-                        {{ form.estado }}
-                    </div>
-
-                    <div class="mb-4">
-                        <label>Diagnóstico Técnico y Observaciones</label>
+                        {{ form.descripcion.label_tag }}
                         {{ form.descripcion }}
                     </div>
 
-                    <div class="mb-4">
-                        <label>Añadir imágenes de evidencia (selección múltiple)</label>
-                        <input type="file" name="imagenes" id="id_imagenes" multiple class="form-control" accept="image/*">
-                        
-                        <div id="image-preview-container" class="d-flex flex-wrap mt-3 bg-dark border border-secondary p-2 rounded" style="min-height: 50px; display: none !important;">
-                            <p class="text-secondary w-100 text-center m-0">Vista previa de archivos seleccionados...</p>
-                        </div>
+                    <div class="mb-3">
+                        {{ form.estado.label_tag }}
+                        {{ form.estado }}
                     </div>
 
-                    <div class="d-grid gap-2 mt-4 mb-5">
-                        <button type="submit" class="btn btn-primary btn-lg shadow fw-bold">GUARDAR CAMBIOS</button>
+                    <div class="mb-3">
+                        <label class="text-info fw-bold">Añadir nuevas imágenes:</label>
+                        {{ form.imagenes }}
+                        <small class="text-secondary d-block mt-1">Puedes seleccionar varias fotos a la vez.</small>
+                    </div>
+
+                    <div id="image-preview-container" class="d-flex flex-wrap mt-3 mb-3 p-2 rounded" style="background: #39373d; display: none !important;">
+                        </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold">GUARDAR CAMBIOS</button>
+                        <a href="{% url 'ver_orden' orden.id %}" class="btn btn-outline-light">Cancelar y Volver</a>
                     </div>
                 </form>
-
-                <hr class="border-secondary mb-4">
-
-                <h4 class="text-white mb-3">Galería de imágenes del pedido</h4>
-
-                <div class="galeria">
-                    {% for img in orden.imagenes.all %}
-                        <div class="card-imagen shadow">
-                            <img src="{{ img.imagen.url }}" alt="Evidencia #{{ img.id }}">
-                            <div class="acciones-imagen p-2">
-                                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-sm btn-info w-100">Descargar</a>
-                                <a href="{% url 'eliminar_imagen' img.id %}" class="btn btn-sm btn-danger w-100">Eliminar</a>
-                            </div>
-                        </div>
-                    {% empty %}
-                        <p class="text-secondary w-100">No hay imágenes registradas aún en esta orden.</p>
-                    {% endfor %}
-                </div>
-
-                <div class="d-grid gap-2 mt-5">
-                    <a href="{% url 'dashboard' %}" class="btn btn-outline-light">VOLVER AL PANEL</a>
-                </div>
             </div>
         </div>
     </div>
@@ -113,7 +78,6 @@
 
     if (fileInput) {
         fileInput.addEventListener('change', function() {
-            
             previewContainer.innerHTML = '';
             const files = this.files;
 
@@ -121,7 +85,6 @@
                 previewContainer.style.setProperty('display', 'flex', 'important');
             } else {
                 previewContainer.style.setProperty('display', 'none', 'important');
-                previewContainer.innerHTML = '<p class="text-secondary w-100 text-center m-0">Vista previa de archivos seleccionados...</p>';
             }
             
             Array.from(files).forEach(file => {
@@ -131,7 +94,6 @@
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         img.classList.add('preview-img');
-                        img.title = file.name;
                         previewContainer.appendChild(img);
                     }
                     reader.readAsDataURL(file);
