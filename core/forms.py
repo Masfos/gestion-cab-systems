@@ -2,6 +2,16 @@ from django import forms
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
 class OrdenTrabajoForm(forms.ModelForm):
+    imagenes = forms.FileField(
+        widget=forms.FileInput(attrs={
+            'multiple': True, 
+            'class': 'form-control',
+            'accept': 'image/*'
+        }),
+        required=False,
+        label="Adjuntar Imágenes"
+    )
+
     class Meta:
         model = OrdenTrabajo
         fields = '__all__'

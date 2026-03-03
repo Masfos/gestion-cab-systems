@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 
 def es_admin(user):
     return user.is_superuser or user.groups.filter(name="Administrador/a").exists()
+
 @login_required
 def dashboard(request):
     ordenes = OrdenTrabajo.objects.all().order_by("-id")
@@ -19,6 +20,33 @@ def dashboard(request):
         "es_mixto": user.groups.filter(name="Usuario Mixto").exists(),
     }
     return render(request, "dashboard.html", context)
+
+@login_required
+def ver_orden(request, orden_id):
+    orden = get_object_or_404(OrdenTrabajo, id=orden_id)
+    return render(request, "ver_orden.html", {"orden": orden, "es_admin": es_admin(request.user)})
+
+@login_required
+def editar_orden(request, orden_id):
+    orden = get_object_or_404(OrdenTrabajo, id=orden_id)
+    if request.method == "POST":
+        form = OrdenTrabajoForm(request.POST, request.FILES, instance=orden)
+        if form.is_valid():
+            form.save()
+            for archivo in request.FILES.getlist("imagenes"):
+                ImagenOrden.objects.create(orden=orden, imagen=archivo)
+            return redirect("ver_orden", orden_id=orden.id)
+    else:
+        form = OrdenTrabajoForm(instance=orden)
+    return render(request, "editar_orden.html", {"form": form, "orden": orden})
+
+@login_required
+def eliminar_orden(request, orden_id):
+    if request.method == "POST" and es_admin(request.user):
+        orden = get_object_or_404(OrdenTrabajo, id=orden_id)
+        orden.delete()
+        return redirect("dashboard")
+    return HttpResponseForbidden()
 
 @login_required
 @user_passes_test(es_admin)
@@ -39,8 +67,7 @@ def registrar_usuario(request):
             error = "Debes seleccionar un rol."
         else:
             nuevo_user = User.objects.create_user(username=username, password=password)
-            grupo = Group.objects.get(id=grupo_id)
-            nuevo_user.groups.add(grupo)
+            nuevo_user.groups.add(Group.objects.get(id=grupo_id))
             return redirect("lista_usuarios")
     return render(request, "registrar_usuario.html", {"grupos": grupos, "error": error})
 
@@ -54,30 +81,6 @@ def eliminar_usuario(request, user_id):
     return redirect("lista_usuarios")
 
 @login_required
-def eliminar_orden(request, orden_id):
-    if request.method == "POST" and es_admin(request.user):
-        orden = get_object_or_404(OrdenTrabajo, id=orden_id)
-        orden.delete()
-        return redirect("dashboard")
-    return HttpResponseForbidden()
-
-@login_required
-def eliminar_cliente(request, cliente_id):
-    if request.method == "POST" and es_admin(request.user):
-        cliente = get_object_or_404(Cliente, id=cliente_id)
-        cliente.delete()
-        return redirect("dashboard")
-    return HttpResponseForbidden()
-
-@login_required
-def eliminar_vehiculo(request, vehiculo_id):
-    if request.method == "POST" and es_admin(request.user):
-        vehiculo = get_object_or_404(Vehiculo, id=vehiculo_id)
-        vehiculo.delete()
-        return redirect("dashboard")
-    return HttpResponseForbidden()
-
-@login_required
 def crear_orden(request):
     if request.method == "POST":
         form = OrdenTrabajoForm(request.POST, request.FILES)
@@ -87,40 +90,6 @@ def crear_orden(request):
     else:
         form = OrdenTrabajoForm()
     return render(request, "formulario.html", {"form": form, "titulo": "Nueva Orden"})
-
-@login_required
-def ver_orden(request, orden_id):
-    orden = get_object_or_404(OrdenTrabajo, id=orden_id)
-    return render(request, "ver_orden.html", {"orden": orden, "es_admin": es_admin(request.user)})
-
-@login_required
-def editar_orden(request, orden_id):
-    try:
-        orden = get_object_or_404(OrdenTrabajo, id=orden_id)
-        
-        if request.method == "POST":
-            form = OrdenTrabajoForm(request.POST, request.FILES, instance=orden)
-            if form.is_valid():
-                form.save()
-                archivos = request.FILES.getlist("imagenes")
-                for archivo in archivos:
-                    ImagenOrden.objects.create(orden=orden, imagen=archivo)
-                
-                try:
-                    return redirect("ver_orden", orden_id=orden.id)
-                except:
-                    return redirect("dashboard")
-        else:
-            form = OrdenTrabajoForm(instance=orden)
-
-        return render(request, "editar_orden.html", {
-            "form": form,
-            "orden": orden,
-            "orden_id": orden.id
-        })
-    except Exception as e:
-        from django.http import HttpResponse
-        return HttpResponse(f"Error crítico en la vista: {e}", status=500)
 
 @login_required
 def crear_cliente(request):
@@ -134,6 +103,13 @@ def crear_cliente(request):
     return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Cliente"})
 
 @login_required
+def eliminar_cliente(request, cliente_id):
+    if request.method == "POST" and es_admin(request.user):
+        get_object_or_404(Cliente, id=cliente_id).delete()
+        return redirect("dashboard")
+    return HttpResponseForbidden()
+
+@login_required
 def crear_vehiculo(request):
     if request.method == "POST":
         form = VehiculoForm(request.POST)
@@ -143,6 +119,13 @@ def crear_vehiculo(request):
     else:
         form = VehiculoForm()
     return render(request, "vehiculo_form.html", {"form": form, "titulo": "Nuevo Vehículo"})
+
+@login_required
+def eliminar_vehiculo(request, vehiculo_id):
+    if request.method == "POST" and es_admin(request.user):
+        get_object_or_404(Vehiculo, id=vehiculo_id).delete()
+        return redirect("dashboard")
+    return HttpResponseForbidden()
 
 @login_required
 def lista_materiales(request):
