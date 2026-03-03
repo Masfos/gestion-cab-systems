@@ -146,7 +146,9 @@ def crear_vehiculo(request):
             return redirect("dashboard")
     else:
         form = VehiculoForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Vehículo"})
+    return render(request, "vehiculo_form.html", {
+        "form": form, 
+        "titulo": "Nuevo Vehículo"})
 
 
 @login_required
