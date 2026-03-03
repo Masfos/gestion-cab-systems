@@ -19,14 +19,14 @@ class OrdenTrabajoForm(forms.ModelForm):
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
-        fields = '__all__'
+        fields = ['nombre', 'telefono', 'email']
 
 class VehiculoForm(forms.ModelForm):
     class Meta:
         model = Vehiculo
-        fields = '__all__'
+        fields = ['cliente', 'marca', 'modelo', 'patente', 'anio']
 
 class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
-        fields = '__all__'
+        fields = ['nombre', 'stock']
