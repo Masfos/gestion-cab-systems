@@ -1,36 +1,56 @@
 from django import forms
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
+# --- PARCHE PARA SUBIDA MÚLTIPLE ---
+# Esto evita el ValueError en Railway/Django
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+class MultipleFileField(forms.ImageField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput(attrs={'multiple': True, 'class': 'form-control'}))
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+# ----------------------------------
+
 class EstiloBaseForm(forms.ModelForm):
-    # Clase base para no repetir el bucle de bootstrap en cada formulario
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
 
-class OrdenTrabajoForm(EstiloBaseForm):
-    # Campo extra para soportar múltiples archivos desde el template
-    fotos_adicionales = forms.FileField(
-        widget=forms.FileInput(attrs={'multiple': True}),
-        required=False,
-        label="Agregar fotos"
-    )
-
-    class Meta:
-        model = OrdenTrabajo
-        fields = ['vehiculo', 'descripcion', 'estado']
-
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = '__all__'
+        fields = ['nombre', 'telefono', 'correo']
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
-        fields = '__all__'
+        fields = ['cliente', 'patente', 'marca', 'modelo', 'anio']
+        labels = {
+            'anio': 'Año'
+        }
 
 class MaterialForm(EstiloBaseForm):
     class Meta:
         model = Material
-        fields = '__all__'
+        fields = ['nombre', 'stock']
+
+class OrdenTrabajoForm(EstiloBaseForm):
+    # Campo personalizado que usa nuestro parche para evitar el crash
+    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
+
+    class Meta:
+        model = OrdenTrabajo
+        fields = ['vehiculo', 'descripcion', 'estado']
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'rows': 4}),
+        }
