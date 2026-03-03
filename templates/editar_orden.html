@@ -1,38 +1,143 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px;">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4 text-white fw-bold">🛠️ Editar Orden #{{ orden.id }}</h2>
+                <hr class="border-secondary mb-4">
 
-<h2>Editar Orden #{{ orden.id }}</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
+                    <style>
 
-    <label>Agregar imágenes (puedes seleccionar varias)</label>
-    <input type="file" name="imagenes" multiple class="form-control">
+                        input[type="text"], input[type="file"], select, textarea {
+                            display: block;
+                            width: 100%;
+                            padding: 0.375rem 0.75rem;
+                            font-size: 1rem;
+                            color: white !important;
+                            background-color: #5a5860 !important;
+                            border: 1px solid #6a6870 !important;
+                            border-radius: 0.375rem;
+                            margin-bottom: 1rem;
+                            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+                        }
 
-    <br>
-    <button type="submit" class="btn btn-success">Guardar</button>
-</form>
+                        input:focus, select:focus, textarea:focus {
+                            background-color: #5a5860 !important;
+                            color: white !important;
+                            outline: none;
+                            border-color: #0d6efd;
+                            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+                        }
 
-<hr>
+                        label { color: white; font-weight: bold; margin-bottom: 5px; display: block; }
+                        .preview-img { 
+                            width: 110px; height: 110px; object-fit: cover; 
+                            border-radius: 8px; border: 2px solid #0d6efd; margin: 8px;
+                            transition: transform 0.2s;
+                        }
+                        .preview-img:hover { transform: scale(1.1); }
+                        
+                        .galeria { display: flex; flex-wrap: wrap; gap: 15px; justify-content: start; }
+                        .card-imagen { background: #5a5860; border: 1px solid #6a6870; border-radius: 10px; width: 150px; text-align: center; padding: 5px; }
+                        .card-imagen img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
+                        .acciones-imagen { display: flex; flex-direction: column; gap: 5px; }
+                    </style>
 
-<h4>Imágenes actuales</h4>
+                    <div class="mb-3">
+                        <label>Cliente (Asignado)</label>
+                        {{ form.cliente }}
+                    </div>
 
-<div class="galeria">
-    {% for img in orden.imagenes.all %}
-        <div class="card-imagen">
-            <img src="{{ img.imagen.url }}">
-            <div class="acciones-imagen">
-                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-sm btn-info">Descargar</a>
-                <a href="{% url 'eliminar_imagen' img.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                    <div class="mb-3">
+                        <label>Vehículo / Equipo</label>
+                        {{ form.vehiculo }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Estado del Servicio</label>
+                        {{ form.estado }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label>Diagnóstico Técnico y Observaciones</label>
+                        {{ form.descripcion }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label>Añadir imágenes de evidencia (selección múltiple)</label>
+                        <input type="file" name="imagenes" id="id_imagenes" multiple class="form-control" accept="image/*">
+                        
+                        <div id="image-preview-container" class="d-flex flex-wrap mt-3 bg-dark border border-secondary p-2 rounded" style="min-height: 50px; display: none !important;">
+                            <p class="text-secondary w-100 text-center m-0">Vista previa de archivos seleccionados...</p>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4 mb-5">
+                        <button type="submit" class="btn btn-primary btn-lg shadow fw-bold">💾 GUARDAR CAMBIOS</button>
+                    </div>
+                </form>
+
+                <hr class="border-secondary mb-4">
+
+                <h4 class="text-white mb-3">📸 Galería de imágenes actuales</h4>
+
+                <div class="galeria">
+                    {% for img in orden.imagenes.all %}
+                        <div class="card-imagen shadow">
+                            <img src="{{ img.imagen.url }}" alt="Evidencia #{{ img.id }}">
+                            <div class="acciones-imagen p-2">
+                                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-sm btn-info w-100">📥 Descargar</a>
+                                <a href="{% url 'eliminar_imagen' img.id %}" class="btn btn-sm btn-danger w-100">🗑️ Eliminar</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-secondary w-100">No hay imágenes registradas aún en esta orden.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid gap-2 mt-5">
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-light">VOLVER AL PANEL</a>
+                </div>
             </div>
         </div>
-    {% empty %}
-        <p>No hay imágenes aún.</p>
-    {% endfor %}
+    </div>
 </div>
 
-<br>
-<a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver</a>
+<script>
+    const fileInput = document.getElementById('id_imagenes');
+    const previewContainer = document.getElementById('image-preview-container');
 
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            
+            previewContainer.innerHTML = '';
+            const files = this.files;
+
+            if (files.length > 0) {
+                previewContainer.style.setProperty('display', 'flex', 'important');
+            } else {
+                previewContainer.style.setProperty('display', 'none', 'important');
+                previewContainer.innerHTML = '<p class="text-secondary w-100 text-center m-0">Vista previa de archivos seleccionados...</p>';
+            }
+            
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('preview-img');
+                        img.title = file.name;
+                        previewContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    }
+</script>
 {% endblock %}
