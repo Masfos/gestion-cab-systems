@@ -2,48 +2,32 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px;">
+        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; color: white;">
             <div class="card-body p-5">
-                <h2 class="text-center mb-4 text-white fw-bold">Editar Orden #{{ orden.id }}</h2>
-                <hr class="border-secondary mb-4">
-
+                <h2 class="text-center mb-4 fw-bold">Editar Orden #{{ orden.id }}</h2>
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     
-                    <style>
-                        input[type="text"], input[type="file"], select, textarea {
-                            display: block; width: 100%; padding: 10px;
-                            color: white !important; background-color: #5a5860 !important;
-                            border: 1px solid #6a6870 !important; border-radius: 8px;
-                            margin-bottom: 15px;
-                        }
-                        label { font-weight: bold; color: #adb5bd; margin-bottom: 5px; display: block; }
-                        .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin: 5px; border: 1px solid #777; }
-                    </style>
-
-                    <div>
-                        <label>Vehículo asociado:</label>
+                    <div class="mb-3">
+                        <label class="form-label text-info">Vehículo</label>
                         {{ form.vehiculo }}
                     </div>
-
-                    <div>
-                        <label>Descripción del servicio:</label>
+                    <div class="mb-3">
+                        <label class="form-label text-info">Descripción</label>
                         {{ form.descripcion }}
                     </div>
-
-                    <div>
-                        <label>Estado actual:</label>
+                    <div class="mb-3">
+                        <label class="form-label text-info">Estado</label>
                         {{ form.estado }}
                     </div>
-
-                    <div class="mt-4 p-3 rounded" style="background-color: #39373d; border: 1px dashed #6a6870;">
-                        <label class="text-info">📸 Añadir nuevas fotografías:</label>
+                    <div class="mb-4 p-3 rounded" style="background: #39373d; border: 1px dashed #6a6870;">
+                        <label class="form-label text-warning fw-bold">📸 Añadir Imágenes (Multiselección)</label>
                         {{ form.imagenes }}
-                        <div id="image-preview-container" class="d-flex flex-wrap mt-2"></div>
+                        <div id="preview" class="d-flex flex-wrap mt-2"></div>
                     </div>
 
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg fw-bold shadow">💾 GUARDAR CAMBIOS</button>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold">GUARDAR CAMBIOS</button>
                         <a href="{% url 'ver_orden' orden.id %}" class="btn btn-outline-light">Cancelar</a>
                     </div>
                 </form>
@@ -53,16 +37,18 @@
 </div>
 
 <script>
-    document.getElementById('id_imagenes').addEventListener('change', function() {
-        const container = document.getElementById('image-preview-container');
-        container.innerHTML = '';
+    document.querySelector('input[type="file"]').addEventListener('change', function() {
+        const preview = document.getElementById('preview');
+        preview.innerHTML = '';
         Array.from(this.files).forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = document.createElement('img');
                 img.src = e.target.result;
-                img.classList.add('preview-img');
-                container.appendChild(img);
+                img.style.width = '70px';
+                img.style.margin = '5px';
+                img.classList.add('rounded', 'border');
+                preview.appendChild(img);
             }
             reader.readAsDataURL(file);
         });
