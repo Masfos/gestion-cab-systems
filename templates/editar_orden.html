@@ -2,25 +2,44 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow-lg">
-            <div class="card-body p-4 p-md-5">
-                <h2 class="text-center text-info mb-4 fw-bold">Editar Orden #{{ orden.id }}</h2>
+        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px;">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4 text-white fw-bold">Editar Orden #{{ orden.id }}</h2>
                 <hr class="border-secondary mb-4">
 
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="text-secondary small fw-bold mb-2 d-block">{{ field.label|upper }}</label>
-                            {{ field }}
-                        </div>
-                    {% endfor %}
 
-                    <div class="mt-4 p-3 rounded bg-dark border border-secondary border-dashed text-center">
-                        <label class="text-info fw-bold d-block mb-2">📸 AÑADIR NUEVAS FOTOS</label>
-                        <input type="file" name="fotos_adicionales" multiple class="form-control" accept="image/*">
-                        <div id="preview-container" class="d-flex flex-wrap justify-content-center mt-3 gap-2"></div>
+                    <style>
+                        input[type="text"], select, textarea {
+                            display: block; width: 100%; padding: 12px;
+                            color: white !important; background-color: #5a5860 !important;
+                            border: 1px solid #6a6870 !important; border-radius: 8px;
+                            margin-bottom: 15px;
+                        }
+                        label { font-weight: bold; color: #adb5bd; margin-bottom: 5px; display: block; }
+                        .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin: 5px; border: 1px solid #777; }
+                    </style>
+
+                    <div class="mb-3">
+                        <label>Vehículo:</label>
+                        {{ form.vehiculo }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Descripción del Trabajo:</label>
+                        {{ form.descripcion }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Estado de la Orden:</label>
+                        {{ form.estado }}
+                    </div>
+
+                    <div class="mt-4 p-3 rounded" style="background-color: #39373d; border: 1px dashed #6a6870;">
+                        <label class="text-info fw-bold">📸 Añadir nuevas fotos:</label>
+                        <input type="file" name="fotos_adicionales" multiple class="form-control bg-dark text-white border-secondary" accept="image/*">
+                        <div id="image-preview" class="d-flex flex-wrap mt-2"></div>
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
@@ -35,15 +54,15 @@
 
 <script>
     document.querySelector('input[name="fotos_adicionales"]').addEventListener('change', function() {
-        const container = document.getElementById('preview-container');
-        container.innerHTML = '';
+        const preview = document.getElementById('image-preview');
+        preview.innerHTML = '';
         Array.from(this.files).forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = document.createElement('img');
                 img.src = e.target.result;
-                img.style.cssText = "width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #555;";
-                container.appendChild(img);
+                img.classList.add('preview-img');
+                preview.appendChild(img);
             }
             reader.readAsDataURL(file);
         });

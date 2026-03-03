@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg mb-4" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
+            <div class="card-body p-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold m-0 text-info">Orden #{{ orden.id }}</h2>
+                    <span class="badge fs-5 {% if orden.estado == 'pendiente' %}bg-warning text-dark{% elif orden.estado == 'finalizado' %}bg-success{% else %}bg-primary{% endif %}">
+                        {{ orden.estado|upper }}
+                    </span>
+                </div>
+                <hr class="border-secondary">
+
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-4">
+                        <h5 class="text-info fw-bold">Cliente</h5>
+                        <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
+                            <p class="mb-1"><strong>{{ orden.cliente.nombre }}</strong></p>
+                            <p class="mb-0 small text-secondary">{{ orden.cliente.telefono }}</p>
+                            <p class="mb-0 small text-secondary">{{ orden.cliente.email }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h5 class="text-info fw-bold">Vehículo</h5>
+                        <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
+                            <p class="mb-1"><strong>{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</strong></p>
+                            <p class="mb-0 small text-secondary">Año: {{ orden.vehiculo.anio }}</p>
+                            <p class="mb-0 small text-secondary">Patente: {{ orden.vehiculo.patente }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <h5 class="text-info fw-bold">Descripción del Diagnóstico</h5>
+                    <p class="p-3 rounded text-light" style="background-color: #39373d; border: 1px solid #5a5860;">{{ orden.descripcion }}</p>
+                </div>
+
+                <hr class="border-secondary my-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-info fw-bold m-0">Materiales y Repuestos</h5>
+                    <a href="{% url 'agregar_material' orden.id %}" class="btn btn-sm btn-outline-info">+ Añadir</a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-dark border-secondary">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Cantidad</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in materiales %}
+                            <tr>
+                                <td>{{ item.material.nombre }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'editar_material' item.id %}" class="btn btn-sm btn-warning">✏️</a>
+                                    <a href="{% url 'eliminar_material' item.id %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Borrar material?')">🗑️</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-muted text-center italic small">No hay materiales registrados aún.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="border-secondary my-4">
+
+                <h5 class="text-info fw-bold mb-3">Imágenes adjuntas</h5>
+                <div class="row g-3">
+                    {% for img in orden.imagenes.all %}
+                    <div class="col-md-4">
+                        <div class="rounded overflow-hidden border border-secondary" style="height: 200px;">
+                            <img src="{{ img.imagen.url }}" class="w-100 h-100" style="object-fit: cover;">
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small italic">Sin imágenes adjuntas.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-light px-4">Volver</a>
+                    <a href="{% url 'editar_orden' orden.id %}" class="btn btn-primary px-4">Editar Orden</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
