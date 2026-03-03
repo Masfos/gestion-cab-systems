@@ -1,7 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
+
+<style>
+    .btn-verde-oscuro {
+        background-color: #1e7e34; /* Verde bosque */
+        border-color: #1c7430;
+        color: white !important;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .btn-verde-oscuro:hover {
+        background-color: #155d27; /* Un tono más oscuro al pasar el mouse */
+        border-color: #114d20;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Mejora visual para las filas al pasar el mouse */
+    #tablaOrdenes tbody tr:hover {
+        background-color: #55535b !important;
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-info">Panel de Control</h2>
+    <h2 class="text-info">🚀 Panel de Control</h2>
     <p class="mb-0 text-secondary"><strong>Usuario:</strong> {{ user.username }}</p>
 </div>
 
@@ -10,7 +33,9 @@
         <a href="{% url 'crear_cliente' %}" class="btn btn-primary">➕ Nuevo Cliente</a>
         <a href="{% url 'crear_vehiculo' %}" class="btn btn-primary">➕ Nuevo Vehículo</a>
         <a href="{% url 'crear_orden' %}" class="btn btn-primary">➕ Nueva Orden</a>
-<a href="{% url 'agregar_material' %}" class="btn btn-verde-oscuro">➕ Agregar Material</a>
+        
+        <a href="{% url 'agregar_material' %}" class="btn btn-verde-oscuro">➕ Agregar Material</a>
+        
         {% if es_admin %}
         <a href="{% url 'lista_usuarios' %}" class="btn btn-warning text-dark fw-bold">👥 Gestionar Empleados</a>
         {% endif %}
@@ -21,7 +46,7 @@
 <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
     <div class="card-body p-4">
         <h3 class="mb-3">Órdenes de Trabajo</h3>
-        <input type="text" id="buscadorOrdenes" placeholder="Filtrar por patente o cliente..." class="form-control mb-4 bg-secondary text-white border-0">
+        <input type="text" id="buscadorOrdenes" placeholder="Filtrar por patente o cliente..." class="form-control mb-4 bg-secondary text-white border-0 py-2" style="border-radius: 8px;">
 
         <div class="table-responsive">
             <table class="table table-hover table-dark align-middle" id="tablaOrdenes">
@@ -38,19 +63,19 @@
                 <tbody>
                     {% for orden in ordenes %}
                     <tr>
-                        <td>{{ orden.id }}</td>
+                        <td><strong>#{{ orden.id }}</strong></td>
                         <td>{{ orden.cliente.nombre }}</td>
                         <td>{{ orden.vehiculo.modelo }}</td>
-                        <td><span class="badge bg-light text-dark">{{ orden.vehiculo.patente }}</span></td>
+                        <td><span class="badge bg-light text-dark font-monospace">{{ orden.vehiculo.patente }}</span></td>
                         <td>
-                            <span class="badge {% if orden.estado == 'pendiente' %}bg-warning text-dark{% elif orden.estado == 'finalizado' %}bg-success{% else %}bg-info{% endif %}">
+                            <span class="badge {% if orden.estado == 'pendiente' %}bg-warning text-dark{% elif orden.estado == 'finalizado' %}bg-success{% else %}bg-info{% endif %} px-3 py-2">
                                 {{ orden.estado|upper }}
                             </span>
                         </td>
                         <td class="text-center">
                             <div class="btn-group">
-                                <a href="{% url 'ver_orden' orden.id %}" class="btn btn-info btn-sm">Ver</a>
-                                <a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning btn-sm">Editar</a>
+                                <a href="{% url 'ver_orden' orden.id %}" class="btn btn-info btn-sm px-3">Ver</a>
+                                <a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning btn-sm px-3">Editar</a>
                                 {% if es_admin %}
                                 <form action="{% url 'eliminar_orden' orden.id %}" method="POST" style="display:inline;" onsubmit="return confirm('¿CONFIRMAS ELIMINAR ESTA ORDEN? Esta acción es irreversible.');">
                                     {% csrf_token %}
@@ -60,6 +85,10 @@
                             </div>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-secondary py-4">No hay órdenes registradas aún.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -68,10 +97,15 @@
 </div>
 
 <script>
+// Script de búsqueda en tiempo real
 document.getElementById("buscadorOrdenes").addEventListener("keyup", function() {
     let filtro = this.value.toLowerCase();
     let filas = document.querySelectorAll("#tablaOrdenes tbody tr");
-    filas.forEach(f => f.style.display = f.innerText.toLowerCase().includes(filtro) ? "" : "none");
+    filas.forEach(f => {
+        const texto = f.innerText.toLowerCase();
+        f.style.display = texto.includes(filtro) ? "" : "none";
+    });
 });
 </script>
+
 {% endblock %}
