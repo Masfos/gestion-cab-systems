@@ -7,39 +7,35 @@ from django.http import HttpResponse
 from .models import OrdenTrabajo, Cliente, Vehiculo, ImagenOrden
 from .forms import OrdenTrabajoForm
 
-# --- VISTAS DE CLIENTES ---
 class ClienteCreateView(LoginRequiredMixin, CreateView):
     model = Cliente
     fields = ['nombre', 'telefono', 'email', 'direccion']
-    template_name = 'cliente_form.html'  # Apunta al diseño oscuro
+    template_name = 'cliente_form.html'  # Diseño oscuro CAB Systems
     success_url = reverse_lazy('dashboard')
 
 class ClienteUpdateView(LoginRequiredMixin, UpdateView):
     model = Cliente
     fields = ['nombre', 'telefono', 'email', 'direccion']
-    template_name = 'cliente_form.html'  # Apunta al diseño oscuro
+    template_name = 'cliente_form.html'  # Diseño oscuro CAB Systems
     success_url = reverse_lazy('dashboard')
 
-# --- VISTAS DE VEHÍCULOS ---
 class VehiculoCreateView(LoginRequiredMixin, CreateView):
     model = Vehiculo
     fields = ['patente', 'marca', 'modelo', 'anio', 'cliente']
-    template_name = 'vehiculo_form.html'  # Apunta al diseño oscuro (con el fix de Año)
+    template_name = 'vehiculo_form.html'  # Diseño oscuro y corrección de "Año"
     success_url = reverse_lazy('dashboard')
 
 class VehiculoUpdateView(LoginRequiredMixin, UpdateView):
     model = Vehiculo
     fields = ['patente', 'marca', 'modelo', 'anio', 'cliente']
-    template_name = 'vehiculo_form.html'  # Apunta al diseño oscuro
+    template_name = 'vehiculo_form.html'  # Diseño oscuro y corrección de "Año"
     success_url = reverse_lazy('dashboard')
 
-# --- DASHBOARD PRINCIPAL ---
 @login_required
 def dashboard(request):
     ordenes = OrdenTrabajo.objects.all().order_by('-id')
     return render(request, 'dashboard.html', {'ordenes': ordenes})
 
-# --- GESTIÓN DE ÓRDENES (Crear y Editar con Imágenes) ---
 @login_required
 def crear_orden(request):
     if request.method == 'POST':
@@ -69,7 +65,6 @@ def editar_orden(request, pk):
         form = OrdenTrabajoForm(instance=orden)
     return render(request, 'editar_orden.html', {'form': form, 'orden': orden})
 
-# --- FUNCIONES DE IMÁGENES ---
 @login_required
 def eliminar_imagen(request, imagen_id):
     imagen = get_object_or_404(ImagenOrden, id=imagen_id)
@@ -80,6 +75,7 @@ def eliminar_imagen(request, imagen_id):
 @login_required
 def descargar_imagen(request, imagen_id):
     imagen_obj = get_object_or_404(ImagenOrden, id=imagen_id)
-    response = HttpResponse(imagen_obj.imagen, content_type="image/jpeg")
+    # Servir la imagen como descarga
+    response = HttpResponse(imagen_obj.imagen, content_type="application/octet-stream")
     response['Content-Disposition'] = f'attachment; filename="{imagen_obj.imagen.name}"'
     return response
