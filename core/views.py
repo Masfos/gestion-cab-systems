@@ -95,24 +95,32 @@ def ver_orden(request, orden_id):
 
 @login_required
 def editar_orden(request, orden_id):
-    orden = get_object_or_404(OrdenTrabajo, id=orden_id)
-    
-    if request.method == "POST":
-        form = OrdenTrabajoForm(request.POST, request.FILES, instance=orden)
-        if form.is_valid():
-            form.save()
-            archivos = request.FILES.getlist("imagenes")
-            for archivo in archivos:
-                ImagenOrden.objects.create(orden=orden, imagen=archivo)
+    try:
+        orden = get_object_or_404(OrdenTrabajo, id=orden_id)
+        
+        if request.method == "POST":
+            form = OrdenTrabajoForm(request.POST, request.FILES, instance=orden)
+            if form.is_valid():
+                form.save()
+                archivos = request.FILES.getlist("imagenes")
+                for archivo in archivos:
+                    ImagenOrden.objects.create(orden=orden, imagen=archivo)
+                
+                try:
+                    return redirect("ver_orden", orden_id=orden.id)
+                except:
+                    return redirect("dashboard")
+        else:
+            form = OrdenTrabajoForm(instance=orden)
 
-            return redirect("ver_orden", orden_id=orden.id)
-    else:
-        form = OrdenTrabajoForm(instance=orden)
-
-    return render(request, "editar_orden.html", {
-        "form": form, 
-        "orden": orden
-    })
+        return render(request, "editar_orden.html", {
+            "form": form,
+            "orden": orden,
+            "orden_id": orden.id
+        })
+    except Exception as e:
+        from django.http import HttpResponse
+        return HttpResponse(f"Error crítico en la vista: {e}", status=500)
 
 @login_required
 def crear_cliente(request):
