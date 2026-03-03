@@ -2,35 +2,17 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-7">
-        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
-            <div class="card-body p-5">
-                <h2 class="text-center mb-4 fw-bold">Gestión de Vehículo / Equipo</h2>
+        <div class="card shadow-lg">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="text-center text-info mb-4 fw-bold">Gestión de Vehículo</h2>
                 <hr class="border-secondary mb-4">
 
                 <form method="POST">
                     {% csrf_token %}
-
-                    <style>
-                        input[type="text"], input[type="number"], select, textarea {
-                            display: block;
-                            width: 100%;
-                            padding: 12px;
-                            color: white !important;
-                            background-color: #5a5860 !important;
-                            border: 1px solid #6a6870 !important;
-                            border-radius: 8px;
-                            margin-bottom: 15px;
-                        }
-                        label { font-weight: bold; margin-bottom: 8px; display: block; color: #fff; }
-                        label[for="id_anio"]::after, label:contains("Anio") {
-                            content: "Año";
-                        }
-                    </style>
-
                     {% for field in form %}
                         <div class="mb-3">
-                            <label for="{{ field.id_for_label }}">
-                                {% if field.label == "Anio" %}Año{% else %}{{ field.label }}{% endif %}
+                            <label class="form-label text-secondary small fw-bold">
+                                {% if field.label == "Anio" %}AÑO{% else %}{{ field.label|upper }}{% endif %}
                             </label>
                             {{ field }}
                             {% if field.errors %}
@@ -38,7 +20,7 @@
                             {% endif %}
                         </div>
                     {% endfor %}
-
+                    
                     <div class="d-grid gap-2 mt-4">
                         <button type="submit" class="btn btn-primary btn-lg fw-bold">GUARDAR VEHÍCULO</button>
                         <a href="{% url 'dashboard' %}" class="btn btn-outline-light">Cancelar</a>
@@ -48,12 +30,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.querySelectorAll('label').forEach(label => {
-        if (label.innerText.includes('Anio')) {
-            label.innerText = label.innerText.replace('Anio', 'Año');
-        }
-    });
-</script>
 {% endblock %}

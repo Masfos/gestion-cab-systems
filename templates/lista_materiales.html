@@ -1,41 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
+<div class="card shadow-lg">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold m-0 text-info">Inventario de Bodega</h2>
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-light btn-sm">← Volver al Panel</a>
+            <h2 class="text-info m-0">Stock de Materiales</h2>
+            <a href="{% url 'agregar_material' %}" class="btn btn-primary btn-sm">+ Agregar</a>
         </div>
-
-        <form method="GET" class="mb-4">
-            <div class="input-group">
-                <span class="input-group-text bg-dark border-secondary text-white">🔍</span>
-                <input type="text" name="q" placeholder="Buscar material o repuesto..." 
-                       value="{{ request.GET.q }}" class="form-control bg-secondary text-white border-secondary">
-            </div>
-        </form>
-
         <div class="table-responsive">
-            <table class="table table-hover table-dark border-secondary">
-                <thead>
-                    <tr class="text-info">
-                        <th>Nombre del Material</th>
-                        <th class="text-center">Stock Disponible</th>
-                    </tr>
+            <table class="table table-hover">
+                <thead class="text-secondary small">
+                    <tr><th>MATERIAL</th><th class="text-center">STOCK</th></tr>
                 </thead>
                 <tbody>
-                    {% for material in materiales %}
+                    {% for m in materiales %}
                     <tr>
-                        <td class="fw-bold">{{ material.nombre }}</td>
+                        <td class="fw-bold">{{ m.nombre }}</td>
                         <td class="text-center">
-                            <span class="badge {% if material.stock < 5 %}bg-danger{% else %}bg-success{% endif %} fs-6 px-3">
-                                {{ material.stock }} unidades
+                            <span class="badge {% if m.stock < 5 %}bg-danger{% else %}bg-success{% endif %} fs-6 px-3">
+                                {{ m.stock }} uds
                             </span>
                         </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-center text-secondary py-4">No se encontraron materiales.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

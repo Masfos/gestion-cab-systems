@@ -2,33 +2,15 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
-            <div class="card-body p-5">
-                <h2 class="text-center mb-4 fw-bold text-info">{{ titulo }}</h2>
-                <hr class="border-secondary mb-4">
-
+        <div class="card shadow-lg">
+            <div class="card-body p-4">
+                <h3 class="text-info mb-4 text-center">{{ titulo|default:"Formulario de Registro" }}</h3>
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    <style>
-                        input, select, textarea {
-                            display: block;
-                            width: 100%;
-                            padding: 12px;
-                            margin-bottom: 20px;
-                            background-color: #5a5860 !important;
-                            border: 1px solid #6a6870 !important;
-                            color: white !important;
-                            border-radius: 10px;
-                        }
-                        label { font-weight: bold; margin-bottom: 8px; display: block; color: #adb5bd; }
-                    </style>
-
                     {{ form.as_p }}
-
                     <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg fw-bold">GUARDAR REGISTRO</button>
-                        <a href="{% url 'dashboard' %}" class="btn btn-outline-light">Cancelar y Volver</a>
+                        <button type="submit" class="btn btn-primary btn-lg">Guardar Cambios</button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-link text-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>
