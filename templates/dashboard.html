@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Panel de Control</h2>
-    <p class="mb-0"><strong>Usuario:</strong> {{ user.username }}</p>
+    <h2 class="text-info">🚀 Panel de Control</h2>
+    <p class="mb-0 text-secondary"><strong>Usuario:</strong> {{ user.username }}</p>
 </div>
 
 <div class="d-flex gap-2 flex-wrap mb-4">
@@ -11,47 +11,60 @@
         <a href="{% url 'crear_vehiculo' %}" class="btn btn-primary">➕ Nuevo Vehículo</a>
         <a href="{% url 'crear_orden' %}" class="btn btn-primary">➕ Nueva Orden</a>
         <a href="{% url 'agregar_material' %}" class="btn btn-primary">➕ Agregar Material</a>
-        <a href="{% url 'lista_usuarios' %}" class="btn btn-warning text-dark">👥 Gestionar Empleados</a>
+        {% if es_admin %}
+        <a href="{% url 'lista_usuarios' %}" class="btn btn-warning text-dark fw-bold">👥 Gestionar Empleados</a>
+        {% endif %}
     {% endif %}
-    <a href="{% url 'lista_materiales' %}" class="btn btn-light text-dark">📦 Ver Materiales</a>
+    <a href="{% url 'lista_materiales' %}" class="btn btn-light text-dark">📦 Ver Stock</a>
 </div>
 
-<h3>Órdenes de Trabajo</h3>
-<input type="text" id="buscadorOrdenes" placeholder="Buscar por patente..." class="form-control mb-3">
+<div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
+    <div class="card-body p-4">
+        <h3 class="mb-3">Órdenes de Trabajo</h3>
+        <input type="text" id="buscadorOrdenes" placeholder="Filtrar por patente o cliente..." class="form-control mb-4 bg-secondary text-white border-0">
 
-<div class="table-responsive">
-    <table class="table table-bordered" id="tablaOrdenes">
-        <thead>
-            <tr class="table-dark">
-                <th>ID</th><th>Cliente</th><th>Vehículo</th><th>Patente</th><th>Estado</th><th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for orden in ordenes %}
-            <tr>
-                <td>{{ orden.id }}</td>
-                <td>{{ orden.cliente.nombre }}</td>
-                <td>{{ orden.vehiculo.modelo }}</td>
-                <td>{{ orden.vehiculo.patente }}</td>
-                <td>
-                    <span class="badge 
-                        {% if orden.estado == 'pendiente' %}bg-warning text-dark
-                        {% elif orden.estado == 'en proceso' or orden.estado == 'en_proceso' %}bg-info
-                        {% elif orden.estado == 'finalizado' %}bg-success
-                        {% elif orden.estado == 'entregado' %}bg-dark text-white border border-secondary
-                        {% elif orden.estado == 'cancelado' %}bg-danger
-                        {% else %}bg-secondary{% endif %}">
-                        {{ orden.estado|upper }}
-                    </span>
-                </td>
-                <td>
-                    <a href="{% url 'ver_orden' orden.id %}" class="btn btn-info btn-sm">Ver</a>
-                    <a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning btn-sm">Editar</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="table-responsive">
+            <table class="table table-hover table-dark align-middle" id="tablaOrdenes">
+                <thead>
+                    <tr class="text-info">
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Vehículo</th>
+                        <th>Patente</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for orden in ordenes %}
+                    <tr>
+                        <td>{{ orden.id }}</td>
+                        <td>{{ orden.cliente.nombre }}</td>
+                        <td>{{ orden.vehiculo.modelo }}</td>
+                        <td><span class="badge bg-light text-dark">{{ orden.vehiculo.patente }}</span></td>
+                        <td>
+                            <span class="badge {% if orden.estado == 'pendiente' %}bg-warning text-dark{% elif orden.estado == 'finalizado' %}bg-success{% else %}bg-info{% endif %}">
+                                {{ orden.estado|upper }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <a href="{% url 'ver_orden' orden.id %}" class="btn btn-info btn-sm">Ver</a>
+                                <a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning btn-sm">Editar</a>
+                                {% if es_admin %}
+                                <form action="{% url 'eliminar_orden' orden.id %}" method="POST" style="display:inline;" onsubmit="return confirm('⚠️ ¿CONFIRMAS ELIMINAR ESTA ORDEN? Esta acción es irreversible.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
