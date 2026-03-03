@@ -1,41 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Nómina de Empleados</h2>
-    <a href="{% url 'registrar_usuario' %}" class="btn btn-primary">➕ Registrar Nuevo Trabajador</a>
-</div>
+<div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold m-0 text-info">Nómina de trabajadores</h2>
+            <a href="{% url 'registrar_usuario' %}" class="btn btn-primary fw-bold">➕ Registrar Trabajador</a>
+        </div>
 
-<div class="table-responsive">
-    <table class="table table-bordered align-middle">
-        <thead class="table-dark text-center">
-            <tr>
-                <th>Usuario</th>
-                <th>Rol / Permisos</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for u in usuarios %}
-            <tr>
-                <td><strong>{{ u.username }}</strong></td>
-                <td class="text-center">
-                    {% for group in u.groups.all %}
-                        <span class="badge bg-info text-dark">{{ group.name }}</span>
-                    {% empty %}
-                        <span class="badge bg-danger">Sin Rol</span>
+        <div class="table-responsive">
+            <table class="table table-hover table-dark border-secondary align-middle">
+                <thead>
+                    <tr class="text-info">
+                        <th>Usuario</th>
+                        <th>Rol / Permisos</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in usuarios %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px; border: 1px solid #6a6870;">
+                                    {{ u.username|slice:":1"|upper }}
+                                </div>
+                                <strong>{{ u.username }}</strong>
+                            </div>
+                        </td>
+                        <td>
+                            {% for group in u.groups.all %}
+                                <span class="badge bg-info text-dark px-3">{{ group.name }}</span>
+                            {% empty %}
+                                <span class="badge bg-danger">Sin Rol Asignado</span>
+                            {% endfor %}
+                        </td>
+                        <td class="text-center">
+                            {% if u != request.user %}
+                            <a href="{% url 'eliminar_usuario' u.id %}" class="btn btn-outline-danger btn-sm px-3" 
+                               onclick="return confirm('¿Seguro que deseas eliminar este acceso?')">Eliminar</a>
+                            {% else %}
+                                <span class="badge bg-secondary">Sesión Activa</span>
+                            {% endif %}
+                        </td>
+                    </tr>
                     {% endfor %}
-                </td>
-                <td class="text-center">
-                    {% if u != request.user %}
-                    <a href="{% url 'eliminar_usuario' u.id %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Seguro que deseas eliminar este empleado?')">Eliminar</a>
-                    {% else %}
-                        <span class="text-muted small italic">(Sesión activa)</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-<a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Volver al Inicio</a>
 {% endblock %}

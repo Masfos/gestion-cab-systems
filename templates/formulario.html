@@ -1,15 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4 fw-bold text-info">✨ {{ titulo }}</h2>
+                <hr class="border-secondary mb-4">
 
-<h2>{{ titulo }}</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <style>
+                        input, select, textarea {
+                            display: block;
+                            width: 100%;
+                            padding: 12px;
+                            margin-bottom: 20px;
+                            background-color: #5a5860 !important;
+                            border: 1px solid #6a6870 !important;
+                            color: white !important;
+                            border-radius: 10px;
+                        }
+                        label { font-weight: bold; margin-bottom: 8px; display: block; color: #adb5bd; }
+                    </style>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Guardar</button>
-</form>
+                    {{ form.as_p }}
 
-<br>
-<a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver</a>
-
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold">GUARDAR REGISTRO</button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-light">Cancelar y Volver</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

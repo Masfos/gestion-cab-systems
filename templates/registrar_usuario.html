@@ -1,38 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center mt-4">
+<div class="row justify-content-center">
     <div class="col-md-5">
-        <div class="card bg-dark text-white border-secondary p-4 shadow">
-            <h3 class="text-center mb-4">Registro de Personal</h3>
+        <div class="card shadow-lg" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
+            <div class="card-body p-5">
+                <h3 class="text-center mb-4 fw-bold text-info">Registro de Personal</h3>
+                <hr class="border-secondary mb-4">
 
-            {% if error %}
-                <div class="alert alert-danger py-2 small">⚠️ {{ error }}</div>
-            {% endif %}
+                {% if error %}
+                    <div class="alert alert-danger py-2 small">⚠️ {{ error }}</div>
+                {% endif %}
 
-            <form method="POST">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label">Nombre de Usuario</label>
-                    <input type="text" name="username" class="form-control bg-secondary text-white border-0" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" name="password" class="form-control bg-secondary text-white border-0" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">Rol del Empleado</label>
-                    <select name="grupo" class="form-select bg-secondary text-white border-0" required>
-                        <option value="" disabled selected>Elegir rol...</option>
+                <form method="POST">
+                    {% csrf_token %}
+                    <style>
+                        input, select {
+                            display: block;
+                            width: 100%;
+                            padding: 12px;
+                            margin-bottom: 20px;
+                            background-color: #5a5860 !important;
+                            border: 1px solid #6a6870 !important;
+                            color: white !important;
+                            border-radius: 10px;
+                        }
+                        label { font-weight: bold; margin-bottom: 8px; display: block; color: #adb5bd; }
+                    </style>
+
+                    <label>Nombre de Usuario</label>
+                    <input type="text" name="username" required>
+
+                    <label>Contraseña Provisional</label>
+                    <input type="password" name="password" required>
+
+                    <label>Rol en el Taller</label>
+                    <select name="grupo" required>
+                        <option value="" disabled selected>Seleccione cargo...</option>
                         {% for grupo in grupos %}
                             <option value="{{ grupo.id }}">{{ grupo.name }}</option>
                         {% endfor %}
                     </select>
-                </div>
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-success">Guardar Empleado</button>
-                    <a href="{% url 'lista_usuarios' %}" class="btn btn-outline-light btn-sm">Cancelar</a>
-                </div>
-            </form>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold">GUARDAR EMPLEADO</button>
+                        <a href="{% url 'lista_usuarios' %}" class="btn btn-outline-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
