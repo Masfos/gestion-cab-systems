@@ -52,7 +52,7 @@
                                 <a href="{% url 'ver_orden' orden.id %}" class="btn btn-info btn-sm">Ver</a>
                                 <a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning btn-sm">Editar</a>
                                 {% if es_admin %}
-                                <form action="{% url 'eliminar_orden' orden.id %}" method="POST" style="display:inline;" onsubmit="return confirm('⚠️ ¿CONFIRMAS ELIMINAR ESTA ORDEN? Esta acción es irreversible.');">
+                                <form action="{% url 'eliminar_orden' orden.id %}" method="POST" style="display:inline;" onsubmit="return confirm('¿CONFIRMAS ELIMINAR ESTA ORDEN? Esta acción es irreversible.');">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                                 </form>
