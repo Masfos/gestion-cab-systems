@@ -11,7 +11,7 @@ class EstiloBaseForm(forms.ModelForm):
 class OrdenTrabajoForm(EstiloBaseForm):
     # Campo extra para soportar múltiples archivos desde el template
     fotos_adicionales = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        widget=forms.FileInput(attrs={'multiple': True}),
         required=False,
         label="Agregar fotos"
     )
