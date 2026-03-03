@@ -3,7 +3,7 @@ from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
 class OrdenTrabajoForm(forms.ModelForm):
     imagenes = forms.ImageField(
-        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'}),
+        widget=forms.FileInput(attrs={'multiple': True, 'class': 'form-control'}),
         required=False,
         label="Adjuntar Imágenes"
     )
