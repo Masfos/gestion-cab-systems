@@ -2,8 +2,12 @@ from django import forms
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
 class OrdenTrabajoForm(forms.ModelForm):
-    imagenes = forms.ImageField(
-        widget=forms.FileInput(attrs={'multiple': True, 'class': 'form-control'}),
+    imagenes = forms.FileField(
+        widget=forms.FileInput(attrs={
+            'multiple': True, 
+            'class': 'form-control',
+            'accept': 'image/*'
+        }),
         required=False,
         label="Adjuntar Imágenes"
     )
