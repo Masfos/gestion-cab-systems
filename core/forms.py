@@ -5,11 +5,10 @@ class OrdenTrabajoForm(forms.ModelForm):
     imagenes = forms.FileField(
         widget=forms.FileInput(attrs={
             'multiple': True, 
-            'class': 'form-control',
-            'accept': 'image/*'
+            'class': 'form-control'
         }),
         required=False,
-        label="Adjuntar Imágenes"
+        label="Subir fotos"
     )
 
     class Meta:
