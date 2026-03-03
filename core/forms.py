@@ -2,7 +2,6 @@ from django import forms
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
 # --- PARCHE PARA SUBIDA MÚLTIPLE ---
-# Esto evita el ValueError en Railway/Django
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
@@ -29,7 +28,8 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'telefono', 'correo']
+        # Se cambió 'correo' por 'email' para coincidir con tu modelo
+        fields = ['nombre', 'telefono', 'email']
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
@@ -45,7 +45,7 @@ class MaterialForm(EstiloBaseForm):
         fields = ['nombre', 'stock']
 
 class OrdenTrabajoForm(EstiloBaseForm):
-    # Campo personalizado que usa nuestro parche para evitar el crash
+    # Campo con el parche para evitar el ValueError
     fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
 
     class Meta:
