@@ -1,59 +1,104 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-info fw-bold">Panel de Control</h2>
+<div class="container-fluid py-4">
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark text-white border-info shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-info fw-bold">ÓRDENES TOTALES</h6>
+                    <h2 class="mb-0">{{ ordenes.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white border-warning shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-warning fw-bold">EN PROCESO</h6>
+                    <h2 class="mb-0">{{ ordenes.filter_en_proceso_count|default:"--" }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white border-success shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-success fw-bold">FINALIZADAS</h6>
+                    <h2 class="mb-0">{{ ordenes.filter_terminado_count|default:"--" }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 text-center d-flex align-items-center justify-content-center">
+            <a href="{% url 'crear_orden' %}" class="btn btn-info btn-lg fw-bold w-100 shadow">
+                + NUEVA ORDEN
+            </a>
+        </div>
+    </div>
+
+    <div class="card bg-dark text-white border-secondary">
+        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-list-task me-2"></i>GESTIÓN DE ÓRDENES</h5>
+            <div class="d-flex gap-2">
+                <a href="{% url 'crear_cliente' %}" class="btn btn-outline-light btn-sm">+ Cliente</a>
+                <a href="{% url 'crear_vehiculo' %}" class="btn btn-outline-light btn-sm">+ Vehículo</a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr class="text-secondary">
+                            <th>ID</th>
+                            <th>FECHA</th>
+                            <th>VEHÍCULO / PATENTE</th>
+                            <th>CLIENTE</th>
+                            <th>ESTADO</th>
+                            <th class="text-center">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for orden in ordenes %}
+                        <tr>
+                            <td class="fw-bold text-info">#{{ orden.id }}</td>
+                            <td>{{ orden.fecha_creacion|date:"d/m/Y" }}</td>
+                            <td>
+                                <span class="fw-bold">{{ orden.vehiculo.patente }}</span><br>
+                                <small class="text-secondary">{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</small>
+                            </td>
+                            <td>
+                                {{ orden.cliente.nombre }}
+                                {% if orden.cliente.empresa %}
+                                    <br><small class="text-info">{{ orden.cliente.empresa }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge {% if orden.estado == 'terminado' %}bg-success{% else %}bg-primary{% endif %}">
+                                    {{ orden.get_estado_display }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{% url 'ver_orden' orden.id %}" class="btn btn-sm btn-outline-info" title="Ver Detalle">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    <a href="{% url 'editar_orden' orden.id %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if es_admin %}
+                                    <a href="{% url 'eliminar_orden' orden.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar orden?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-secondary italic">No hay órdenes registradas actualmente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div class="d-flex gap-2 flex-wrap mb-4">
-    {% if es_admin or es_mixto %}
-        <a href="{% url 'crear_cliente' %}" class="btn btn-primary fw-bold">➕ Cliente</a>
-        <a href="{% url 'crear_vehiculo' %}" class="btn btn-primary fw-bold">🚗 Vehículo</a>
-        <a href="{% url 'crear_orden' %}" class="btn btn-primary fw-bold">📝 Nueva Orden</a>
-    {% endif %}
-    <a href="{% url 'lista_materiales' %}" class="btn btn-success fw-bold">📦 Inventario</a>
-    {% if es_admin %}
-        <a href="{% url 'lista_usuarios' %}" class="btn btn-warning text-dark fw-bold">👥 Personal</a>
-    {% endif %}
-</div>
-
-<input type="text" id="busc" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Buscar...">
-
-<div class="table-responsive">
-    <table class="table table-hover align-middle" id="tabla">
-        <thead class="table-dark">
-            <tr>
-                <th class="fw-bold">ID</th><th class="fw-bold">Vehículo</th><th class="fw-bold">Estado</th><th class="text-center fw-bold">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for o in ordenes %}
-            <tr>
-                <td class="fw-bold">#{{ o.id }}</td>
-                <td>{{ o.vehiculo.patente }}</td>
-                <td><span class="badge bg-primary px-3 fw-bold">{{ o.get_estado_display }}</span></td>
-                <td class="text-center">
-                    <div class="btn-group">
-                        <a href="{% url 'ver_orden' o.id %}" class="btn btn-info btn-sm fw-bold">Ver</a>
-                        <a href="{% url 'editar_orden' o.id %}" class="btn btn-warning btn-sm fw-bold text-dark">Editar</a>
-                        {% if es_admin %}
-                        <form action="{% url 'eliminar_orden' o.id %}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar esta orden?')">
-                            {% csrf_token %}<button class="btn btn-danger btn-sm fw-bold">Eliminar</button>
-                        </form>
-                        {% endif %}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<script>
-document.getElementById("busc").addEventListener("keyup", function() {
-    let f = this.value.toLowerCase();
-    document.querySelectorAll("#tabla tbody tr").forEach(tr => {
-        tr.style.display = tr.innerText.toLowerCase().includes(f) ? "" : "none";
-    });
-});
-</script>
 {% endblock %}
