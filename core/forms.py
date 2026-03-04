@@ -23,8 +23,10 @@ class EstiloBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            if not isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs.update({'class': 'form-control'})
+            field.widget.attrs.update({
+                'class': 'form-control bg-dark text-white border-secondary',
+                'style': 'border-radius: 10px; padding: 12px;'
+            })
 
 class ClienteForm(EstiloBaseForm):
     class Meta:
@@ -41,16 +43,19 @@ class MaterialForm(EstiloBaseForm):
         model = Material
         fields = ['nombre', 'descripcion', 'stock']
 
-class OrdenTrabajoForm(EstiloBaseForm):
-    # Campo personalizado para fotos múltiples
-    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
 
+class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
         fields = ['vehiculo', 'descripcion', 'estado']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4}),
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
+
 
 # FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):

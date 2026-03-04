@@ -10,10 +10,8 @@ class Cliente(models.Model):
     email = models.EmailField(blank=True, null=True)
 
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre} ({self.empresa})" if self.empresa else self.nombre
 
-
-# Cada vehículo pertenece a un cliente
 class Vehiculo(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     marca = models.CharField(max_length=100)
@@ -22,7 +20,8 @@ class Vehiculo(models.Model):
     anio = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.marca} {self.modelo} - {self.patente}"
+        empresa_txt = f" ({self.cliente.empresa})" if self.cliente.empresa else ""
+        return f"{self.marca} {self.modelo} [{self.patente}] - {self.cliente.nombre}{empresa_txt}"
 
 
 # Orden de trabajo asociada a un vehículo y su cliente
