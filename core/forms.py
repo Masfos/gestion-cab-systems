@@ -18,7 +18,7 @@ class MultipleFileField(forms.ImageField):
         else:
             result = single_file_clean(data, initial)
         return result
-        
+
 class EstiloBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +31,7 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'telefono', 'email']
+        fields = ['nombre', 'empresa', 'telefono', 'email']
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
@@ -46,34 +46,39 @@ class MaterialForm(EstiloBaseForm):
         model = Material
         fields = ['nombre', 'descripcion', 'stock']
         widgets = {
-            'stock': forms.NumberInput(attrs={'min': '0', 'class': 'form-control bg-dark text-white border-secondary', 'style': 'border-radius: 10px; padding: 12px;'}),
+            'stock': forms.NumberInput(attrs={
+                'min': '0',
+                'class': 'form-control bg-dark text-white border-secondary',
+                'style': 'border-radius: 10px; padding: 12px;'
+            }),
         }
-
 
 class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
-        fields = ['vehiculo', 'descripcion', 'estado']
+        fields = ['cliente', 'vehiculo', 'descripcion', 'estado']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['cliente'].queryset = Cliente.objects.order_by('-id')
+        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.empresa})" if obj.empresa else obj.nombre
+        self.fields['vehiculo'].queryset = Vehiculo.objects.order_by('-id')
         self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
-
 
 # FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):
     password = forms.CharField(
-        label="Contraseña",
+        label="Contrasena",
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
     rol = forms.ChoiceField(
         choices=[
-            ('Administrador', 'Administrador/a'),
-            ('Técnico', 'Técnico/a'),
-            ('Mixto', 'Usuario Mixto')
+            ('Administrador/a', 'Administrador/a'),
+            ('Tecnico/a', 'Tecnico/a'),
+            ('Usuario Mixto', 'Usuario Mixto'),
         ],
         widget=forms.Select(attrs={'class': 'form-control'})
     )
