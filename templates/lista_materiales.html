@@ -17,6 +17,7 @@
                     <th>Nombre</th>
                     <th>Descripción</th>
                     <th>Stock</th>
+                    <th class="text-center">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,9 +30,18 @@
                             {{ m.stock }}
                         </span>
                     </td>
+                    <td class="text-center">
+                        {% if es_admin %}
+                        <form action="{% url 'eliminar_material_bodega' m.id %}" method="POST" class="d-inline"
+                              onsubmit="return confirm('¿Eliminar {{ m.nombre }}?')">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm">🗑️ Eliminar</button>
+                        </form>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="3" class="text-center text-secondary">Sin materiales registrados.</td></tr>
+                <tr><td colspan="4" class="text-center text-secondary">Sin materiales registrados.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
