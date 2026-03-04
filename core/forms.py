@@ -2,13 +2,13 @@ from django import forms
 from django.contrib.auth.models import User, Group
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
-# 1. Widget corregido para evitar el crash de 'multiple'
-class MultipleFileInput(forms.FileInput): # Usamos FileInput, NO ClearableFileInput
+# 1. Widget corregido para subida múltiple sin errores
+class MultipleFileInput(forms.FileInput):
     allow_multiple_selected = True
 
 class MultipleFileField(forms.ImageField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("widget", MultipleFileInput(attrs={'multiple': True, 'class': 'form-control bg-dark text-white'}))
+        kwargs.setdefault("widget", MultipleFileInput(attrs={'multiple': True, 'class': 'form-control bg-dark text-white border-secondary'}))
         super().__init__(*args, **kwargs)
 
     def clean(self, data, initial=None):
@@ -19,7 +19,6 @@ class MultipleFileField(forms.ImageField):
             result = single_file_clean(data, initial)
         return result
 
-# 2. Estilo base para que todo sea oscuro y elegante
 class EstiloBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -27,49 +26,37 @@ class EstiloBaseForm(forms.ModelForm):
             if not isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({'class': 'form-control bg-dark text-white border-secondary'})
 
+# --- FORMULARIOS ---
+
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'telefono', 'email']
+        fields = ['nombre', 'empresa', 'telefono', 'email'] # RECUPERADO: empresa
+        labels = {'empresa': 'Empresa / Flota (Opcional)'}
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
         fields = ['cliente', 'patente', 'marca', 'modelo', 'anio']
-        labels = {
-            'anio': 'Año',  # Corregido: Ya no aparecerá "Anio"
-        }
+        labels = {'anio': 'Año'}
 
-class MaterialForm(EstiloBaseForm):
-    class Meta:
-        model = Material
-        fields = ['nombre', 'descripcion', 'stock']
-
-# 3. Orden de Trabajo UNIFICADA (Sin duplicados)
 class OrdenTrabajoForm(EstiloBaseForm):
-    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica (Puedes seleccionar varias)")
+    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
 
     class Meta:
         model = OrdenTrabajo
-        fields = ['vehiculo', 'descripcion', 'estado']
+        # RECUPERADO: cliente para selección manual
+        fields = ['vehiculo', 'cliente', 'descripcion', 'estado']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el problema o trabajo...'}),
-            'vehiculo': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
-            'estado': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
+            'descripcion': forms.Textarea(attrs={'rows': 4}),
+            'vehiculo': forms.Select(attrs={'class': 'form-select'}),
+            'cliente': forms.Select(attrs={'class': 'form-select'}),
         }
 
-# 4. Registro de trabajadores
 class RegistroTrabajadorForm(forms.ModelForm):
-    password = forms.CharField(
-        label="Contraseña",
-        widget=forms.PasswordInput(attrs={'class': 'form-control bg-dark text-white border-secondary'})
-    )
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}))
     rol = forms.ChoiceField(
-        choices=[
-            ('Administrador', 'Administrador/a'),
-            ('Técnico', 'Técnico/a'),
-            ('Mixto', 'Usuario Mixto')
-        ],
+        choices=[('Administrador', 'Administrador/a'), ('Técnico', 'Técnico/a'), ('Mixto', 'Usuario Mixto')],
         widget=forms.Select(attrs={'class': 'form-control bg-dark text-white border-secondary'})
     )
 
