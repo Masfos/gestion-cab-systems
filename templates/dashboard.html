@@ -5,51 +5,51 @@
         <div class="col-md-3">
             <div class="card bg-dark text-white border-info shadow-sm">
                 <div class="card-body">
-                    <h6 class="text-info fw-bold">ÓRDENES TOTALES</h6>
-                    <h2 class="mb-0">{{ ordenes.count }}</h2>
+                    <h6 class="text-info fw-bold mb-1">ÓRDENES TOTALES</h6>
+                    <h2 class="mb-0 fw-bold">{{ ordenes.count }}</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-dark text-white border-warning shadow-sm">
                 <div class="card-body">
-                    <h6 class="text-warning fw-bold">EN PROCESO</h6>
-                    <h2 class="mb-0">{{ ordenes.filter_en_proceso_count|default:"--" }}</h2>
+                    <h6 class="text-warning fw-bold mb-1">EN PROCESO</h6>
+                    <h2 class="mb-0 fw-bold">{{ en_proceso_count|default:"0" }}</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-dark text-white border-success shadow-sm">
                 <div class="card-body">
-                    <h6 class="text-success fw-bold">FINALIZADAS</h6>
-                    <h2 class="mb-0">{{ ordenes.filter_terminado_count|default:"--" }}</h2>
+                    <h6 class="text-success fw-bold mb-1">FINALIZADAS</h6>
+                    <h2 class="mb-0 fw-bold">{{ terminadas_count|default:"0" }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 text-center d-flex align-items-center justify-content-center">
-            <a href="{% url 'crear_orden' %}" class="btn btn-info btn-lg fw-bold w-100 shadow">
-                + NUEVA ORDEN
+        <div class="col-md-3 d-flex align-items-center">
+            <a href="{% url 'crear_orden' %}" class="btn btn-info btn-lg fw-bold w-100 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>NUEVA ORDEN
             </a>
         </div>
     </div>
 
-    <div class="card bg-dark text-white border-secondary">
-        <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-list-task me-2"></i>GESTIÓN DE ÓRDENES</h5>
+    <div class="card bg-dark text-white border-secondary shadow">
+        <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-dark-custom">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-tools me-2"></i>PANEL DE CONTROL</h5>
             <div class="d-flex gap-2">
-                <a href="{% url 'crear_cliente' %}" class="btn btn-outline-light btn-sm">+ Cliente</a>
+                <a href="{% url 'crear_cliente' %}" class="btn btn-outline-light btn-sm">+ Cliente / Empresa</a>
                 <a href="{% url 'crear_vehiculo' %}" class="btn btn-outline-light btn-sm">+ Vehículo</a>
             </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-dark table-hover mb-0">
-                    <thead>
-                        <tr class="text-secondary">
-                            <th>ID</th>
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead class="table-dark border-secondary">
+                        <tr class="text-secondary small">
+                            <th class="ps-4">ID</th>
                             <th>FECHA</th>
-                            <th>VEHÍCULO / PATENTE</th>
-                            <th>CLIENTE</th>
+                            <th>VEHÍCULO</th>
+                            <th>CLIENTE / EMPRESA</th>
                             <th>ESTADO</th>
                             <th class="text-center">ACCIONES</th>
                         </tr>
@@ -57,33 +57,33 @@
                     <tbody>
                         {% for orden in ordenes %}
                         <tr>
-                            <td class="fw-bold text-info">#{{ orden.id }}</td>
-                            <td>{{ orden.fecha_creacion|date:"d/m/Y" }}</td>
+                            <td class="ps-4 fw-bold text-info">#{{ orden.id }}</td>
+                            <td class="small">{{ orden.fecha_creacion|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <span class="fw-bold">{{ orden.vehiculo.patente }}</span><br>
-                                <small class="text-secondary">{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</small>
+                                <span class="badge bg-light text-dark font-monospace">{{ orden.vehiculo.patente }}</span><br>
+                                <small class="text-secondary">{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }} ({{ orden.vehiculo.anio }})</small>
                             </td>
                             <td>
-                                {{ orden.cliente.nombre }}
+                                <span class="fw-bold">{{ orden.cliente.nombre }}</span>
                                 {% if orden.cliente.empresa %}
-                                    <br><small class="text-info">{{ orden.cliente.empresa }}</small>
+                                <br><small class="text-info"><i class="bi bi-building me-1"></i>{{ orden.cliente.empresa }}</small>
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge {% if orden.estado == 'terminado' %}bg-success{% else %}bg-primary{% endif %}">
-                                    {{ orden.get_estado_display }}
+                                <span class="badge {% if orden.estado == 'terminado' %}bg-success{% else %}bg-primary{% endif %} px-3">
+                                    {{ orden.get_estado_display|upper }}
                                 </span>
                             </td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    <a href="{% url 'ver_orden' orden.id %}" class="btn btn-sm btn-outline-info" title="Ver Detalle">
+                            <td class="text-center pe-4">
+                                <div class="btn-group shadow-sm">
+                                    <a href="{% url 'ver_orden' orden.id %}" class="btn btn-sm btn-outline-info px-3">
                                         <i class="bi bi-eye"></i> Ver
                                     </a>
-                                    <a href="{% url 'editar_orden' orden.id %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <a href="{% url 'editar_orden' orden.id %}" class="btn btn-sm btn-outline-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     {% if es_admin %}
-                                    <a href="{% url 'eliminar_orden' orden.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar orden?')">
+                                    <a href="{% url 'eliminar_orden' orden.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar esta orden?')">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                     {% endif %}
@@ -92,7 +92,10 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center py-4 text-secondary italic">No hay órdenes registradas actualmente.</td>
+                            <td colspan="6" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No hay órdenes de trabajo registradas.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -101,4 +104,10 @@
         </div>
     </div>
 </div>
+
+<style>
+    .bg-dark-custom { background-color: #1a1d21; }
+    .table-hover tbody tr:hover { background-color: #2c3034 !important; }
+    .badge { letter-spacing: 0.5px; }
+</style>
 {% endblock %}

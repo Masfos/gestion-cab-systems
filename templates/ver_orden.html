@@ -6,7 +6,7 @@
             <h3 class="mb-0 text-info fw-bold">
                 <i class="bi bi-file-earmark-text me-2"></i> Orden de Trabajo #{{ orden.id }}
             </h3>
-            <span class="badge {% if orden.estado == 'terminado' %}bg-success{% else %}bg-primary{% endif %} fs-6 px-3 py-2">
+            <span class="badge {% if orden.estado == 'terminado' %}bg-success{% else %}bg-primary{% endif %} fs-6 px-3 py-2 shadow-sm">
                 {{ orden.get_estado_display|upper }}
             </span>
         </div>
@@ -19,8 +19,8 @@
                             <i class="bi bi-car-front me-2"></i>DATOS DEL VEHÍCULO
                         </h5>
                         <p class="mb-2"><strong>Patente:</strong> <span class="badge bg-light text-dark fs-6 ms-2">{{ orden.vehiculo.patente }}</span></p>
-                        <p class="mb-2"><strong>Marca/Modelo:</strong> {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</p>
-                        <p class="mb-0"><strong>Año:</strong> {{ orden.vehiculo.anio }}</p>
+                        <p class="mb-2 text-light"><strong>Marca/Modelo:</strong> {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</p>
+                        <p class="mb-0 text-light"><strong>Año:</strong> {{ orden.vehiculo.anio }}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -28,19 +28,23 @@
                         <h5 class="text-secondary fw-bold border-bottom border-secondary pb-2 mb-3">
                             <i class="bi bi-person me-2"></i>DATOS DEL CLIENTE
                         </h5>
-                        <p class="mb-2"><strong>Nombre:</strong> {{ orden.cliente.nombre }}</p>
+                        <p class="mb-2 text-light"><strong>Nombre:</strong> {{ orden.cliente.nombre }}</p>
+                        
                         {% if orden.cliente.empresa %}
-                            <p class="mb-2"><strong>Empresa:</strong> <span class="text-info">{{ orden.cliente.empresa }}</span></p>
+                        <p class="mb-2 text-light"><strong>Empresa:</strong> <span class="text-info">{{ orden.cliente.empresa }}</span></p>
                         {% endif %}
-                        <p class="mb-2"><strong>Teléfono:</strong> {{ orden.cliente.telefono }}</p>
-                        <p class="mb-0"><strong>Fecha Ingreso:</strong> {{ orden.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                        
+                        <p class="mb-2 text-light"><strong>Teléfono:</strong> {{ orden.cliente.telefono }}</p>
+                        <p class="mb-0 text-light"><strong>Fecha Ingreso:</strong> {{ orden.fecha_creacion|date:"d/m/Y H:i" }}</p>
                     </div>
                 </div>
             </div>
 
             <div class="mb-4">
                 <h5 class="text-info fw-bold mb-3"><i class="bi bi-tools me-2"></i>DESCRIPCIÓN DEL TRABAJO</h5>
-                <div class="p-3 bg-black rounded border border-secondary text-light" style="min-height: 100px; white-space: pre-wrap;">{{ orden.descripcion }}</div>
+                <div class="p-3 bg-black rounded border border-secondary text-light" style="min-height: 100px; white-space: pre-wrap;">
+                    {{ orden.descripcion }}
+                </div>
             </div>
 
             <h4 class="text-info fw-bold mt-5 mb-3"><i class="bi bi-camera me-2"></i>EVIDENCIA FOTOGRÁFICA</h4>
@@ -49,24 +53,34 @@
                     <div class="col">
                         <div class="card bg-black border-secondary h-100 shadow-sm hover-zoom">
                             <a href="{{ img.imagen.url }}" target="_blank">
-                                <img src="{{ img.imagen.url }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;">
+                                <img src="{{ img.imagen.url }}" class="card-img-top rounded-top" style="height: 180px; object-fit: cover;" alt="Evidencia">
                             </a>
                             <div class="card-body p-2">
-                                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm w-100 fw-bold">Descargar</a>
+                                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm w-100 fw-bold">
+                                    <i class="bi bi-download me-1"></i> Descargar
+                                </a>
                             </div>
                         </div>
                     </div>
                 {% empty %}
                     <div class="col-12">
-                        <p class="text-secondary italic">No hay fotos registradas.</p>
+                        <div class="alert alert-dark border-secondary text-secondary italic">
+                            No se han subido imágenes para esta orden.
+                        </div>
                     </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="card-footer border-secondary bg-dark-custom d-flex justify-content-between p-3">
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary fw-bold px-4">Volver</a>
-            <a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning fw-bold text-dark px-4">Editar Orden</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary fw-bold px-4">
+                <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
+            </a>
+            <div>
+                <a href="{% url 'editar_orden' orden.id %}" class="btn btn-warning fw-bold text-dark px-4">
+                    <i class="bi bi-pencil-square me-2"></i>Editar Orden
+                </a>
+            </div>
         </div>
     </div>
 </div>

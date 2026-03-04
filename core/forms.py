@@ -2,8 +2,7 @@ from django import forms
 from django.contrib.auth.models import User, Group
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
-# 1. Widget corregido para subida múltiple sin errores
-class MultipleFileInput(forms.FileInput):
+class MultipleFileInput(forms.FileInput): 
     allow_multiple_selected = True
 
 class MultipleFileField(forms.ImageField):
@@ -18,7 +17,7 @@ class MultipleFileField(forms.ImageField):
         else:
             result = single_file_clean(data, initial)
         return result
-
+        
 class EstiloBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,32 +30,53 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'empresa', 'telefono', 'email'] # RECUPERADO: empresa
-        labels = {'empresa': 'Empresa / Flota (Opcional)'}
+        fields = ['nombre', 'empresa', 'telefono', 'email']
+        labels = {
+            'empresa': 'Empresa / Flota (Opcional)',
+        }
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
         fields = ['cliente', 'patente', 'marca', 'modelo', 'anio']
-        labels = {'anio': 'Año'}
+        labels = {
+            'anio': 'Año',
+        }
+        widgets = {
+            'cliente': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
+        }
+
+class MaterialForm(EstiloBaseForm):
+    class Meta:
+        model = Material
+        fields = ['nombre', 'descripcion', 'stock']
 
 class OrdenTrabajoForm(EstiloBaseForm):
-    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
+    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica (Puedes seleccionar varias)")
 
     class Meta:
         model = OrdenTrabajo
-        # RECUPERADO: cliente para selección manual
         fields = ['vehiculo', 'cliente', 'descripcion', 'estado']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4}),
-            'vehiculo': forms.Select(attrs={'class': 'form-select'}),
-            'cliente': forms.Select(attrs={'class': 'form-select'}),
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el problema o trabajo...'}),
+            'vehiculo': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
+            'cliente': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
+            'estado': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
         }
 
+# --- REGISTRO DE TRABAJADORES ---
+
 class RegistroTrabajadorForm(forms.ModelForm):
-    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}))
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control bg-dark text-white border-secondary'})
+    )
     rol = forms.ChoiceField(
-        choices=[('Administrador', 'Administrador/a'), ('Técnico', 'Técnico/a'), ('Mixto', 'Usuario Mixto')],
+        choices=[
+            ('Administrador', 'Administrador/a'),
+            ('Técnico', 'Técnico/a'),
+            ('Mixto', 'Usuario Mixto')
+        ],
         widget=forms.Select(attrs={'class': 'form-control bg-dark text-white border-secondary'})
     )
 
