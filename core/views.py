@@ -25,7 +25,6 @@ def dashboard(request):
 
 @login_required
 def ver_orden(request, orden_id):
-    # El prefetch_related es vital para que las imágenes aparezcan en la vista previa
     orden = get_object_or_404(OrdenTrabajo.objects.prefetch_related('imagenes'), id=orden_id)
     return render(request, "ver_orden.html", {"orden": orden})
 
@@ -35,17 +34,15 @@ def crear_orden(request):
         form = OrdenTrabajoForm(request.POST, request.FILES)
         if form.is_valid():
             orden = form.save(commit=False)
-            # Lógica automática: vincula el cliente del vehículo y el creador
             orden.cliente = orden.vehiculo.cliente
             orden.creado_por = request.user
             orden.save()
-            # Guarda múltiples fotos para la vista previa
             for f in request.FILES.getlist('fotos'): 
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("dashboard")
     else:
         form = OrdenTrabajoForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Nueva Orden de Trabajo"})
+    return render(request, "formulario.html", {"form": form, "titulo": "Nueva Orden"})
 
 @login_required
 def editar_orden(request, orden_id):
@@ -65,83 +62,74 @@ def editar_orden(request, orden_id):
 
 @login_required
 def eliminar_orden(request, orden_id):
-    if not es_admin(request.user):
-        return HttpResponseForbidden()
+    if not es_admin(request.user): return HttpResponseForbidden()
     get_object_or_404(OrdenTrabajo, id=orden_id).delete()
     return redirect("dashboard")
 
-# --- Gestión de Personal (AQUÍ ESTABA EL ERROR) ---
+# --- Gestión de Clientes ---
 @login_required
-def lista_usuarios(request):
-    if not es_admin(request.user):
-        return HttpResponseForbidden()
-    return render(request, "lista_usuarios.html", {"usuarios": User.objects.all()})
-
-@login_required
-def registrar_usuario(request):
-    if not es_admin(request.user):
-        return HttpResponseForbidden()
+def crear_cliente(request):
     if request.method == "POST":
-        form = RegistroTrabajadorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("lista_usuarios")
-    else:
-        form = RegistroTrabajadorForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Registrar Trabajador"})
+        form = ClienteForm(request.POST)
+        if form.is_valid(): form.save(); return redirect("dashboard")
+    return render(request, "formulario.html", {"form": ClienteForm(), "titulo": "Nuevo Cliente"})
 
 @login_required
-def eliminar_usuario(request, user_id):
-    if not es_admin(request.user):
-        return HttpResponseForbidden()
-    u = get_object_or_404(User, id=user_id)
-    if not u.is_superuser and u != request.user:
-        u.delete()
-    return redirect("lista_usuarios")
+def eliminar_cliente(request, cliente_id):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    get_object_or_404(Cliente, id=cliente_id).delete()
+    return redirect("dashboard")
 
-# --- Inventario y Clientes ---
+# --- Gestión de Vehículos ---
+@login_required
+def crear_vehiculo(request):
+    if request.method == "POST":
+        form = VehiculoForm(request.POST)
+        if form.is_valid(): form.save(); return redirect("dashboard")
+    return render(request, "formulario.html", {"form": VehiculoForm(), "titulo": "Nuevo Vehículo"})
+
+@login_required
+def eliminar_vehiculo(request, vehiculo_id):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    get_object_or_404(Vehiculo, id=vehiculo_id).delete()
+    return redirect("dashboard")
+
+# --- Inventario ---
 @login_required
 def lista_materiales(request):
     q = request.GET.get("q", "")
-    items = Material.objects.all()
-    if q:
-        items = items.filter(nombre__icontains=q)
-    return render(request, "lista_materiales.html", {"materiales": items})
+    mats = Material.objects.filter(nombre__icontains=q) if q else Material.objects.all()
+    return render(request, "lista_materiales.html", {"materiales": mats})
 
 @login_required
 def agregar_material(request):
     if request.method == "POST":
         form = MaterialForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("lista_materiales")
-    else:
-        form = MaterialForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Agregar Material"})
+        if form.is_valid(): form.save(); return redirect("lista_materiales")
+    return render(request, "formulario.html", {"form": MaterialForm(), "titulo": "Registrar Material"})
+
+# --- Personal ---
+@login_required
+def lista_usuarios(request):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    return render(request, "lista_usuarios.html", {"usuarios": User.objects.all()})
 
 @login_required
-def crear_cliente(request):
+def registrar_usuario(request):
+    if not es_admin(request.user): return HttpResponseForbidden()
     if request.method == "POST":
-        form = ClienteForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("dashboard")
-    else:
-        form = ClienteForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Cliente"})
+        form = RegistroTrabajadorForm(request.POST)
+        if form.is_valid(): form.save(); return redirect("lista_usuarios")
+    return render(request, "formulario.html", {"form": RegistroTrabajadorForm(), "titulo": "Nuevo Trabajador"})
 
 @login_required
-def crear_vehiculo(request):
-    if request.method == "POST":
-        form = VehiculoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("dashboard")
-    else:
-        form = VehiculoForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Vehículo"})
+def eliminar_usuario(request, user_id):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    u = get_object_or_404(User, id=user_id)
+    if not u.is_superuser and u != request.user: u.delete()
+    return redirect("lista_usuarios")
 
-# --- Descargas ---
+# --- Multimedia y Descargas ---
 @login_required
 def descargar_imagen(request, imagen_id):
     img = get_object_or_404(ImagenOrden, id=imagen_id)

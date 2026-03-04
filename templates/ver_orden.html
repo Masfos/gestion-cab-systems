@@ -1,11 +1,13 @@
 <h4 class="text-info fw-bold mt-4">Evidencia Fotográfica</h4>
 <div class="d-flex flex-wrap gap-3 mt-3">
     {% for img in orden.imagenes.all %}
-        <div class="card bg-dark border-secondary p-2 text-center shadow" style="width: 200px;">
+        <div class="card bg-dark border-secondary p-2 text-center" style="width: 200px;">
             <img src="{{ img.imagen.url }}" class="img-fluid rounded mb-2" style="height: 140px; width: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src)">
-            <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm fw-bold w-100">⬇ Descargar</a>
+            <div class="d-grid">
+                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm fw-bold">⬇ Descargar</a>
+            </div>
         </div>
     {% empty %}
-        <p class="text-secondary">No hay imágenes adjuntas en esta orden.</p>
+        <p class="text-secondary">No hay imágenes adjuntas.</p>
     {% endfor %}
 </div>
