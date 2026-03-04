@@ -31,7 +31,7 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'telefono', 'email']
+        fields = ['nombre', 'empresa', 'telefono', 'email']
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
@@ -47,13 +47,16 @@ class MaterialForm(EstiloBaseForm):
 class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
-        fields = ['vehiculo', 'descripcion', 'estado']
+        fields = ['cliente', 'vehiculo', 'descripcion', 'estado']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['cliente'].queryset = Cliente.objects.order_by('-id')
+        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.empresa})" if obj.empresa else obj.nombre
+        self.fields['vehiculo'].queryset = Vehiculo.objects.order_by('-id')
         self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
 
 
