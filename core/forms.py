@@ -18,7 +18,7 @@ class MultipleFileField(forms.ImageField):
         else:
             result = single_file_clean(data, initial)
         return result
-        
+
 class EstiloBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,30 +44,32 @@ class MaterialForm(EstiloBaseForm):
         fields = ['nombre', 'descripcion', 'stock']
 
 
-class OrdenTrabajoForm(forms.ModelForm):
+class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
-        fields = ['vehiculo', 'descripcion', 'estado']
+        fields = ['cliente', 'vehiculo', 'descripcion', 'estado']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4}),
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Esto garantiza que veas Cliente y Empresa en el selector
+        self.fields['cliente'].queryset = Cliente.objects.order_by('-id')
+        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.empresa})" if obj.empresa else obj.nombre
+        self.fields['vehiculo'].queryset = Vehiculo.objects.order_by('-id')
         self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
 
 
 # FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):
     password = forms.CharField(
-        label="Contraseña",
+        label="Contrasena",
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
     rol = forms.ChoiceField(
         choices=[
             ('Administrador', 'Administrador/a'),
-            ('Técnico', 'Técnico/a'),
+            ('Tecnico', 'Tecnico/a'),
             ('Mixto', 'Usuario Mixto')
         ],
         widget=forms.Select(attrs={'class': 'form-control'})
@@ -85,7 +87,7 @@ class RegistroTrabajadorForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"]) # Encripta la clave
+        user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
             rol_nombre = self.cleaned_data.get('rol')
