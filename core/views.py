@@ -251,3 +251,16 @@ def vehiculos_por_cliente(request):
         return JsonResponse({'vehiculos': data})
     except Cliente.DoesNotExist:
         return JsonResponse({'vehiculos': []})
+
+
+@login_required
+def editar_material_bodega(request, material_id):
+    material = get_object_or_404(Material, id=material_id)
+    if request.method == "POST":
+        form = MaterialForm(request.POST, instance=material)
+        if form.is_valid():
+            form.save()
+            return redirect("lista_materiales")
+    else:
+        form = MaterialForm(instance=material)
+    return render(request, "formulario.html", {"form": form, "titulo": "Editar Material"})
