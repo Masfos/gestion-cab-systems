@@ -5,6 +5,7 @@ from django.http import HttpResponseForbidden, FileResponse
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material, ImagenOrden
 from .forms import OrdenTrabajoForm, ClienteForm, VehiculoForm, MaterialForm, RegistroTrabajadorForm
 
+# --- Utilidades de acceso ---
 def es_admin(user):
     return user.is_superuser or user.groups.filter(name="Administrador/a").exists()
 
@@ -83,6 +84,15 @@ def crear_cliente(request):
     return render(request, "formulario.html", {"form": form, "titulo": "Registrar Cliente"})
 
 @login_required
+def eliminar_cliente(request, cliente_id):
+    if not es_admin(request.user):
+        return HttpResponseForbidden()
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    if request.method == "POST":
+        cliente.delete()
+    return redirect("dashboard")
+
+@login_required
 def crear_vehiculo(request):
     if request.method == "POST":
         form = VehiculoForm(request.POST)
@@ -91,6 +101,15 @@ def crear_vehiculo(request):
             return redirect("dashboard")
     form = VehiculoForm()
     return render(request, "formulario.html", {"form": form, "titulo": "Registrar Vehículo"})
+
+@login_required
+def eliminar_vehiculo(request, vehiculo_id):
+    if not es_admin(request.user):
+        return HttpResponseForbidden()
+    vehiculo = get_object_or_404(Vehiculo, id=vehiculo_id)
+    if request.method == "POST":
+        vehiculo.delete()
+    return redirect("dashboard")
 
 # --- Materiales ---
 
@@ -117,7 +136,7 @@ def descargar_imagen(request, imagen_id):
     img = get_object_or_404(ImagenOrden, id=imagen_id)
     return FileResponse(img.imagen.open(), as_attachment=True)
 
-# --- Personal (Corregido) ---
+# --- Personal ---
 
 @login_required
 def lista_usuarios(request):
@@ -129,7 +148,6 @@ def lista_usuarios(request):
 def registrar_usuario(request):
     if not es_admin(request.user):
         return HttpResponseForbidden()
-    
     if request.method == "POST":
         form = RegistroTrabajadorForm(request.POST)
         if form.is_valid():
