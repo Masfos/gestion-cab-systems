@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden, FileResponse, Http404
-from .models import OrdenTrabajo, Cliente, Vehiculo, Material, ImagenOrden
-from .forms import OrdenTrabajoForm, ClienteForm, VehiculoForm, MaterialForm, RegistroTrabajadorForm
+from .models import OrdenTrabajo, Cliente, Vehiculo, Material, ImagenOrden, MaterialUsado
+from .forms import OrdenTrabajoForm, ClienteForm, VehiculoForm, MaterialForm, RegistroTrabajadorForm, MaterialUsadoForm
 import os
 
 # --- Utilidades de acceso ---
@@ -26,7 +26,7 @@ def dashboard(request):
 @login_required
 def ver_orden(request, orden_id):
     orden = get_object_or_404(OrdenTrabajo.objects.prefetch_related('imagenes'), id=orden_id)
-    return render(request, "ver_orden.html", {"orden": orden})
+    return render(request, "ver_orden.html", {"orden": orden, "es_admin": es_admin(request.user)})
 
 @login_required
 def crear_orden(request):
@@ -137,3 +137,39 @@ def descargar_imagen(request, imagen_id):
         return FileResponse(img.imagen.open('rb'), as_attachment=True, filename=os.path.basename(img.imagen.name))
     except:
         raise Http404("Archivo no encontrado")
+
+# --- Materiales en Orden ---
+@login_required
+def agregar_material_orden(request, orden_id):
+    orden = get_object_or_404(OrdenTrabajo, id=orden_id)
+    if request.method == "POST":
+        form = MaterialUsadoForm(request.POST)
+        if form.is_valid():
+            material_usado = form.save(commit=False)
+            material_usado.orden = orden
+            material_usado.save()
+            return redirect("ver_orden", orden_id=orden.id)
+    else:
+        form = MaterialUsadoForm()
+    return render(request, "formulario.html", {"form": form, "titulo": "Agregar Material"})
+
+@login_required
+def editar_material_orden(request, item_id):
+    item = get_object_or_404(MaterialUsado, id=item_id)
+    if request.method == "POST":
+        form = MaterialUsadoForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect("ver_orden", orden_id=item.orden.id)
+    else:
+        form = MaterialUsadoForm(instance=item)
+    return render(request, "formulario.html", {"form": form, "titulo": "Editar Material"})
+
+@login_required
+def eliminar_material_orden(request, item_id):
+    if not es_admin(request.user):
+        return HttpResponseForbidden()
+    item = get_object_or_404(MaterialUsado, id=item_id)
+    orden_id = item.orden.id
+    item.delete()
+    return redirect("ver_orden", orden_id=orden_id)

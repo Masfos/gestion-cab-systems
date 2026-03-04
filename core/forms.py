@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User, Group
-from .models import OrdenTrabajo, Cliente, Vehiculo, Material
+from .models import OrdenTrabajo, Cliente, Vehiculo, Material, MaterialUsado
 
-# --- PARCHE PARA SUBIDA MÚLTIPLE DE IMÁGENES ---
+# --- SUBIDA MÚLTIPLE DE IMÁGENES ---
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
@@ -18,7 +18,7 @@ class MultipleFileField(forms.ImageField):
         else:
             result = single_file_clean(data, initial)
         return result
-
+        
 class EstiloBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +31,7 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'empresa', 'telefono', 'email']
+        fields = ['nombre', 'telefono', 'email']
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
@@ -47,29 +47,26 @@ class MaterialForm(EstiloBaseForm):
 class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
-        fields = ['cliente', 'vehiculo', 'descripcion', 'estado']
+        fields = ['vehiculo', 'descripcion', 'estado']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['cliente'].queryset = Cliente.objects.order_by('-id')
-        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.empresa})" if obj.empresa else obj.nombre
-        self.fields['vehiculo'].queryset = Vehiculo.objects.order_by('-id')
         self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
 
 
 # FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):
     password = forms.CharField(
-        label="Contrasena",
+        label="Contraseña",
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
     rol = forms.ChoiceField(
         choices=[
             ('Administrador', 'Administrador/a'),
-            ('Tecnico', 'Tecnico/a'),
+            ('Técnico', 'Técnico/a'),
             ('Mixto', 'Usuario Mixto')
         ],
         widget=forms.Select(attrs={'class': 'form-control'})
@@ -94,3 +91,13 @@ class RegistroTrabajadorForm(forms.ModelForm):
             grupo, _ = Group.objects.get_or_create(name=rol_nombre)
             user.groups.add(grupo)
         return user
+
+class MaterialUsadoForm(EstiloBaseForm):
+    class Meta:
+        model = MaterialUsado
+        fields = ['material', 'cantidad']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['material'].queryset = Material.objects.order_by('nombre')
+        self.fields['material'].label_from_instance = lambda obj: f"{obj.nombre} (Stock: {obj.stock})"

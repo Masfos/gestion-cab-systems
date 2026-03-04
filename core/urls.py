@@ -26,4 +26,9 @@ urlpatterns = [
     path('materiales/', views.lista_materiales, name='lista_materiales'),
     path('materiales/agregar/', views.agregar_material, name='agregar_material'),
     path('imagen/descargar/<int:imagen_id>/', views.descargar_imagen, name='descargar_imagen'),
+
+    # Materiales en Orden
+    path('orden/<int:orden_id>/material/agregar/', views.agregar_material_orden, name='agregar_material'),
+    path('material/<int:item_id>/editar/', views.editar_material_orden, name='editar_material'),
+    path('material/<int:item_id>/eliminar/', views.eliminar_material_orden, name='eliminar_material'),
 ]
