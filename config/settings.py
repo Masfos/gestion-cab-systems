@@ -3,10 +3,16 @@ from pathlib import Path
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'clave-segura-de-respaldo')
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
 DEBUG = False
+
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ["https://*.railway.app"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.railway.app",
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -17,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -29,7 +36,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'config.urls'
+
 
 TEMPLATES = [
     {
@@ -41,13 +50,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.media',
             ],
         },
     },
 ]
 
+
 WSGI_APPLICATION = 'config.wsgi.application'
+
 
 DATABASES = {
     'default': dj_database_url.config(
@@ -57,16 +67,28 @@ DATABASES = {
     )
 }
 
+
 LANGUAGE_CODE = 'es-cl'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
 
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# --- CONFIGURACIÓN DE FOTOS ---
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
