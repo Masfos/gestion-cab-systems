@@ -2,12 +2,13 @@ from django import forms
 from django.contrib.auth.models import User, Group
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
-class MultipleFileInput(forms.ClearableFileInput):
+# 1. Widget corregido para evitar el crash de 'multiple'
+class MultipleFileInput(forms.FileInput): # Usamos FileInput, NO ClearableFileInput
     allow_multiple_selected = True
 
 class MultipleFileField(forms.ImageField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("widget", MultipleFileInput(attrs={'multiple': True, 'class': 'form-control'}))
+        kwargs.setdefault("widget", MultipleFileInput(attrs={'multiple': True, 'class': 'form-control bg-dark text-white'}))
         super().__init__(*args, **kwargs)
 
     def clean(self, data, initial=None):
@@ -17,13 +18,14 @@ class MultipleFileField(forms.ImageField):
         else:
             result = single_file_clean(data, initial)
         return result
-        
+
+# 2. Estilo base para que todo sea oscuro y elegante
 class EstiloBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             if not isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs.update({'class': 'form-control'})
+                field.widget.attrs.update({'class': 'form-control bg-dark text-white border-secondary'})
 
 class ClienteForm(EstiloBaseForm):
     class Meta:
@@ -34,26 +36,33 @@ class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
         fields = ['cliente', 'patente', 'marca', 'modelo', 'anio']
+        labels = {
+            'anio': 'Año',  # Corregido: Ya no aparecerá "Anio"
+        }
 
 class MaterialForm(EstiloBaseForm):
     class Meta:
         model = Material
         fields = ['nombre', 'descripcion', 'stock']
 
+# 3. Orden de Trabajo UNIFICADA (Sin duplicados)
 class OrdenTrabajoForm(EstiloBaseForm):
-    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
+    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica (Puedes seleccionar varias)")
 
     class Meta:
         model = OrdenTrabajo
         fields = ['vehiculo', 'descripcion', 'estado']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4}),
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el problema o trabajo...'}),
+            'vehiculo': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
+            'estado': forms.Select(attrs={'class': 'form-select bg-dark text-white border-secondary'}),
         }
 
+# 4. Registro de trabajadores
 class RegistroTrabajadorForm(forms.ModelForm):
     password = forms.CharField(
         label="Contraseña",
-        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control bg-dark text-white border-secondary'})
     )
     rol = forms.ChoiceField(
         choices=[
@@ -61,17 +70,17 @@ class RegistroTrabajadorForm(forms.ModelForm):
             ('Técnico', 'Técnico/a'),
             ('Mixto', 'Usuario Mixto')
         ],
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control bg-dark text-white border-secondary'})
     )
 
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control'}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombres'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellidos'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'username': forms.TextInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control bg-dark text-white border-secondary', 'placeholder': 'Nombres'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control bg-dark text-white border-secondary', 'placeholder': 'Apellidos'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control bg-dark text-white border-secondary'}),
         }
 
     def save(self, commit=True):
@@ -83,14 +92,3 @@ class RegistroTrabajadorForm(forms.ModelForm):
             grupo, _ = Group.objects.get_or_create(name=rol_nombre)
             user.groups.add(grupo)
         return user
-
-class OrdenTrabajoForm(forms.ModelForm):
-    fotos = forms.ImageField(
-        widget=forms.ClearableFileInput(attrs={'multiple': True}), 
-        required=False,
-        label='Evidencia Fotográfica'
-    )
-    
-    class Meta:
-        model = OrdenTrabajo
-        fields = ['vehiculo', 'descripcion', 'estado']
