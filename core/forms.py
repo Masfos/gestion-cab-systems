@@ -35,7 +35,7 @@ class VehiculoForm(forms.ModelForm):
         model = Vehiculo
         fields = ['patente', 'marca', 'modelo', 'anio', 'cliente']
         labels = {
-            'anio': 'Año', # AQUÍ CORREGIMOS EL NOMBRE
+            'anio': 'Año',
         }
 
 class OrdenTrabajoForm(forms.ModelForm):
@@ -44,23 +44,11 @@ class OrdenTrabajoForm(forms.ModelForm):
     class Meta:
         model = OrdenTrabajo
         fields = ['vehiculo', 'descripcion', 'estado']
-        # Quitamos 'cliente' de aquí porque se asigna solo en la View
 
 class MaterialForm(EstiloBaseForm):
     class Meta:
         model = Material
         fields = ['nombre', 'descripcion', 'stock']
-
-class OrdenTrabajoForm(EstiloBaseForm):
-    # Campo personalizado para fotos múltiples
-    fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
-
-    class Meta:
-        model = OrdenTrabajo
-        fields = ['vehiculo', 'descripcion', 'estado']
-        widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4}),
-        }
 
 # FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):
@@ -89,7 +77,7 @@ class RegistroTrabajadorForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"]) # Encripta la clave
+        user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
             rol_nombre = self.cleaned_data.get('rol')
