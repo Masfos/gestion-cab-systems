@@ -60,21 +60,6 @@ def eliminar_orden(request, orden_id):
     get_object_or_404(OrdenTrabajo, id=orden_id).delete()
     return redirect("dashboard")
 
-# --- CLIENTES Y VEHÍCULOS ---
-@login_required
-def crear_cliente(request):
-    if request.method == "POST":
-        form = ClienteForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("dashboard")
-    return render(request, "formulario.html", {"form": ClienteForm(), "titulo": "Nuevo Cliente"})
-
-@login_required
-def crear_vehiculo(request):
-    if request.method == "POST":
-        form = VehiculoForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("dashboard")
-    return render(request, "formulario.html", {"form": VehiculoForm(), "titulo": "Nuevo Vehículo"})
-
 # --- MATERIALES ---
 @login_required
 def lista_materiales(request):
@@ -89,7 +74,7 @@ def agregar_material(request):
         if form.is_valid(): form.save(); return redirect("lista_materiales")
     return render(request, "formulario.html", {"form": MaterialForm(), "titulo": "Registrar Nuevo Material"})
 
-# --- PERSONAL ---
+# --- GESTIÓN DE PERSONAL (USUARIOS) ---
 @login_required
 def lista_usuarios(request):
     if not es_admin(request.user): return HttpResponseForbidden()
@@ -103,11 +88,19 @@ def registrar_usuario(request):
         if form.is_valid(): form.save(); return redirect("lista_usuarios")
     return render(request, "formulario.html", {"form": RegistroTrabajadorForm(), "titulo": "Nuevo Trabajador"})
 
-# --- DESCARGA Y MULTIMEDIA ---
+@login_required
+def eliminar_usuario(request, user_id):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    u = get_object_or_404(User, id=user_id)
+    if not u.is_superuser and u != request.user:
+        u.delete()
+    return redirect("lista_usuarios")
+
+# --- MULTIMEDIA Y DESCARGAS ---
 @login_required
 def descargar_imagen(request, imagen_id):
     img = get_object_or_404(ImagenOrden, id=imagen_id)
     try:
         return FileResponse(img.imagen.open('rb'), as_attachment=True, filename=os.path.basename(img.imagen.name))
     except Exception:
-        raise Http404("El archivo no existe en el servidor.")
+        raise Http404("Archivo no encontrado")
