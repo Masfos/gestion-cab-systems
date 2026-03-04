@@ -6,20 +6,20 @@
 
 <div class="d-flex gap-2 flex-wrap mb-4">
     {% if es_admin or es_mixto %}
-        <a href="{% url 'crear_cliente' %}" class="btn btn-primary">➕ Cliente</a>
-        <a href="{% url 'crear_vehiculo' %}" class="btn btn-primary">🚗 Vehículo</a>
-        <a href="{% url 'crear_orden' %}" class="btn btn-success fw-bold">📝 Nueva Orden</a>
+        <a href="{% url 'crear_cliente' %}" class="btn btn-primary fw-bold">➕ Cliente</a>
+        <a href="{% url 'crear_vehiculo' %}" class="btn btn-primary fw-bold">🚗 Vehículo</a>
+        <a href="{% url 'crear_orden' %}" class="btn btn-primary fw-bold">📝 Nueva Orden</a>
     {% endif %}
-    <a href="{% url 'lista_materiales' %}" class="btn btn-secondary">📦 Inventario</a>
+    <a href="{% url 'lista_materiales' %}" class="btn btn-success fw-bold">📦 Inventario</a>
     {% if es_admin %}
-        <a href="{% url 'lista_usuarios' %}" class="btn btn-warning text-dark">👥 Personal</a>
+        <a href="{% url 'lista_usuarios' %}" class="btn btn-warning text-dark fw-bold">👥 Personal</a>
     {% endif %}
 </div>
 
-<input type="text" id="busc" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Filtrar por patente o cliente...">
+<input type="text" id="busc" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Buscar...">
 
 <div class="table-responsive">
-    <table class="table table-hover" id="tabla">
+    <table class="table table-hover align-middle" id="tabla">
         <thead class="table-dark">
             <tr>
                 <th>ID</th><th>Vehículo</th><th>Estado</th><th class="text-center">Acciones</th>
@@ -30,14 +30,14 @@
             <tr>
                 <td>#{{ o.id }}</td>
                 <td>{{ o.vehiculo.patente }}</td>
-                <td><span class="badge bg-primary">{{ o.get_estado_display }}</span></td>
+                <td><span class="badge bg-primary px-3">{{ o.get_estado_display }}</span></td>
                 <td class="text-center">
                     <div class="btn-group">
-                        <a href="{% url 'ver_orden' o.id %}" class="btn btn-info btn-sm">Ver</a>
-                        <a href="{% url 'editar_orden' o.id %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'ver_orden' o.id %}" class="btn btn-info btn-sm fw-bold">Ver</a>
+                        <a href="{% url 'editar_orden' o.id %}" class="btn btn-warning btn-sm fw-bold text-dark">Editar</a>
                         {% if es_admin %}
                         <form action="{% url 'eliminar_orden' o.id %}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar orden?')">
-                            {% csrf_token %}<button class="btn btn-danger btn-sm">X</button>
+                            {% csrf_token %}<button class="btn btn-danger btn-sm fw-bold">X</button>
                         </form>
                         {% endif %}
                     </div>
