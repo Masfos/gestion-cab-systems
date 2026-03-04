@@ -31,7 +31,13 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'empresa', 'telefono', 'email']
+        fields = ['nombre', 'rut', 'empresa', 'telefono', 'email']
+        widgets = {
+            'rut': forms.TextInput(attrs={
+                'placeholder': 'Ej: 12345678-9',
+                'maxlength': '12',
+            }),
+        }
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
@@ -64,9 +70,11 @@ class OrdenTrabajoForm(EstiloBaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['cliente'].queryset = Cliente.objects.order_by('-id')
-        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.empresa})" if obj.empresa else obj.nombre
+        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} — {obj.rut} ({obj.empresa})" if obj.empresa else (f"{obj.nombre} — {obj.rut}" if obj.rut else obj.nombre)
+        self.fields['cliente'].widget.attrs.update({'id': 'id_cliente', 'class': 'form-select bg-dark text-white border-secondary select2-cliente'})
         self.fields['vehiculo'].queryset = Vehiculo.objects.order_by('-id')
-        self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
+        self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre}"
+        self.fields['vehiculo'].widget.attrs.update({'id': 'id_vehiculo', 'class': 'form-select bg-dark text-white border-secondary select2-vehiculo'})
 
 # FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):

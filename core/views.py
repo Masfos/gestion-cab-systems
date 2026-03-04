@@ -5,6 +5,7 @@ from django.http import HttpResponseForbidden, FileResponse, Http404
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material, ImagenOrden, MaterialUsado
 from .forms import OrdenTrabajoForm, ClienteForm, VehiculoForm, MaterialForm, RegistroTrabajadorForm, MaterialUsadoForm
 import os
+import json
 
 # --- Utilidades de acceso ---
 def es_admin(user):
@@ -19,7 +20,7 @@ def dashboard(request):
         "clientes": Cliente.objects.all().order_by("-id"),
         "vehiculos": Vehiculo.objects.all().order_by("-id"),
         "es_admin": es_admin(u),
-        "es_tecnico": u.groups.filter(name="Tecnico/a").exists(),
+        "es_tecnico": u.groups.filter(name="Técnico/a").exists(),
         "es_mixto": u.groups.filter(name="Usuario Mixto").exists(),
     }
     return render(request, "dashboard.html", ctx)
@@ -42,7 +43,7 @@ def crear_orden(request):
             return redirect("dashboard")
     else:
         form = OrdenTrabajoForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Nueva Orden"})
+    return render(request, "formulario.html", {"form": form, "titulo": "Nueva Orden", "vehiculos_json": json.dumps(list(Vehiculo.objects.values("id", "cliente_id", "marca", "modelo", "patente")))})
 
 @login_required
 def editar_orden(request, orden_id):
@@ -58,7 +59,7 @@ def editar_orden(request, orden_id):
             return redirect("dashboard")
     else:
         form = OrdenTrabajoForm(instance=orden)
-    return render(request, "formulario.html", {"form": form, "titulo": "Editar Orden"})
+    return render(request, "formulario.html", {"form": form, "titulo": "Editar Orden", "vehiculos_json": json.dumps(list(Vehiculo.objects.values("id", "cliente_id", "marca", "modelo", "patente")))})
 
 @login_required
 def eliminar_orden(request, orden_id):
@@ -131,7 +132,7 @@ def eliminar_vehiculo(request, vehiculo_id):
 def lista_materiales(request):
     q = request.GET.get("q", "")
     mats = Material.objects.filter(nombre__icontains=q) if q else Material.objects.all()
-    return render(request, "lista_materiales.html", {"materiales": mats, "q": q})
+    return render(request, "lista_materiales.html", {"materiales": mats, "q": q, "es_admin": es_admin(request.user)})
 
 @login_required
 def agregar_material(request):
@@ -213,3 +214,40 @@ def eliminar_material_orden(request, item_id):
     orden_id = item.orden.id
     item.delete()
     return redirect("ver_orden", orden_id=orden_id)
+
+
+@login_required
+def eliminar_material(request, material_id):
+    if not es_admin(request.user):
+        return HttpResponseForbidden()
+    get_object_or_404(Material, id=material_id).delete()
+    return redirect("lista_materiales")
+
+
+# --- AJAX ---
+from django.http import JsonResponse
+
+@login_required
+def vehiculos_por_cliente(request):
+    cliente_id = request.GET.get('cliente_id')
+    if not cliente_id:
+        return JsonResponse({'vehiculos': []})
+    try:
+        cliente = Cliente.objects.get(id=cliente_id)
+        # Buscar vehículos del cliente y de otros clientes de la misma empresa
+        if cliente.empresa:
+            vehiculos = Vehiculo.objects.filter(
+                cliente__empresa=cliente.empresa
+            ).order_by('-id')
+        else:
+            vehiculos = Vehiculo.objects.filter(cliente=cliente).order_by('-id')
+        data = [
+            {
+                'id': v.id,
+                'text': f"{v.marca} {v.modelo} [{v.patente}] - {v.cliente.nombre}"
+            }
+            for v in vehiculos
+        ]
+        return JsonResponse({'vehiculos': data})
+    except Cliente.DoesNotExist:
+        return JsonResponse({'vehiculos': []})

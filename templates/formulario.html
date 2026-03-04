@@ -7,32 +7,35 @@
                 <h2 class="text-center mb-4 fw-bold text-info" style="letter-spacing: 1px;">{{ titulo }}</h2>
                 <hr class="border-secondary mb-4">
 
+                <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+                <style>
+                    label {
+                        font-weight: 600; margin-bottom: 10px; display: block;
+                        color: #0dcaf0; font-size: 0.9rem; text-transform: uppercase;
+                    }
+                    select option { background: #212529; color: white; }
+                    .form-control:focus, .form-select:focus {
+                        background-color: #3e4146 !important;
+                        border-color: #0dcaf0 !important;
+                        box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+                        color: white;
+                    }
+                    .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #5a5860; }
+                    .select2-container--default .select2-selection--single {
+                        background-color: #212529; border: 1px solid #6c757d;
+                        border-radius: 10px; height: 48px; padding: 8px 12px; color: white;
+                    }
+                    .select2-container--default .select2-selection--single .select2-selection__rendered { color: white; line-height: 28px; }
+                    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 46px; }
+                    .select2-dropdown { background-color: #212529; border: 1px solid #6c757d; color: white; }
+                    .select2-container--default .select2-results__option--highlighted[aria-selected] { background-color: #0dcaf0; color: #000; }
+                    .select2-search__field { background-color: #2c2f33 !important; color: white !important; border: 1px solid #6c757d !important; }
+                    .select2-results__option { color: white; padding: 8px 12px; }
+                    .select2-container { width: 100% !important; }
+                </style>
+
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    <style>
-                        label { 
-                            font-weight: 600; 
-                            margin-bottom: 10px; 
-                            display: block; 
-                            color: #0dcaf0;
-                            font-size: 0.9rem;
-                            text-transform: uppercase;
-                        }
-                        select option { background: #212529; color: white; }
-                        .form-control:focus {
-                            background-color: #3e4146 !important;
-                            border-color: #0dcaf0 !important;
-                            box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
-                            color: white;
-                        }
-                        .preview-img {
-                            width: 80px; height: 80px;
-                            object-fit: cover;
-                            border-radius: 8px;
-                            border: 1px solid #5a5860;
-                        }
-                    </style>
 
                     {% for field in form %}
                         <div class="mb-4">
@@ -49,16 +52,13 @@
                         <label>Fotos adjuntas</label>
                         <input type="file" name="fotos" multiple accept="image/*"
                             class="form-control bg-dark text-white border-secondary"
-                            style="border-radius: 10px; padding: 12px;"
-                            id="inputFotos">
+                            style="border-radius: 10px; padding: 12px;" id="inputFotos">
                         <div id="preview" class="d-flex flex-wrap gap-2 mt-3"></div>
                     </div>
                     {% endif %}
 
                     <div class="d-grid gap-2 mt-5">
-                        <button type="submit" class="btn btn-info btn-lg fw-bold text-dark shadow">
-                            <i class="bi bi-save me-2"></i>GUARDAR REGISTRO
-                        </button>
+                        <button type="submit" class="btn btn-info btn-lg fw-bold text-dark shadow">GUARDAR REGISTRO</button>
                         <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary border-0">Cancelar y Volver</a>
                     </div>
                 </form>
@@ -67,20 +67,74 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-document.getElementById('inputFotos')?.addEventListener('change', function () {
-    const preview = document.getElementById('preview');
-    preview.innerHTML = '';
-    Array.from(this.files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.classList.add('preview-img');
-            preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
+$(document).ready(function() {
+
+    if ($('.select2-cliente').length) {
+        $('.select2-cliente').select2({ placeholder: 'Buscar cliente...', allowClear: true });
+    }
+    if ($('.select2-vehiculo').length) {
+        $('.select2-vehiculo').select2({ placeholder: 'Selecciona primero un cliente...', allowClear: true });
+    }
+
+    // Filtro dinámico de vehículos
+    $('#id_cliente').on('change', function() {
+        const clienteId = $(this).val();
+        const $vehiculo = $('#id_vehiculo');
+        $vehiculo.empty().append('<option value="">Cargando...</option>').trigger('change');
+        if (!clienteId) {
+            $vehiculo.empty().append('<option value="">Selecciona primero un cliente</option>').trigger('change');
+            return;
+        }
+        $.get('/ajax/vehiculos/', { cliente_id: clienteId }, function(data) {
+            $vehiculo.empty().append('<option value="">Selecciona un vehiculo</option>');
+            if (data.vehiculos.length === 0) {
+                $vehiculo.append('<option value="" disabled>Sin vehiculos registrados</option>');
+            } else {
+                data.vehiculos.forEach(function(v) {
+                    $vehiculo.append('<option value="' + v.id + '">' + v.text + '</option>');
+                });
+            }
+            $vehiculo.trigger('change');
+        });
     });
+
+    // Formato RUT automático
+    const rutInput = document.getElementById('id_rut');
+    if (rutInput) {
+        rutInput.addEventListener('input', function() {
+            let val = this.value.replace(/[^0-9kK]/g, '').toUpperCase();
+            if (val.length > 1) {
+                const dv = val.slice(-1);
+                let cuerpo = val.slice(0, -1);
+                cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                this.value = cuerpo + '-' + dv;
+            } else {
+                this.value = val;
+            }
+        });
+    }
+
+    // Preview fotos
+    const inputFotos = document.getElementById('inputFotos');
+    if (inputFotos) {
+        inputFotos.addEventListener('change', function() {
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '';
+            Array.from(this.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('preview-img');
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
 });
 </script>
 {% endblock %}
