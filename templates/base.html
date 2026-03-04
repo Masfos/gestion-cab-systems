@@ -15,16 +15,17 @@
         .galeria { display: flex; flex-wrap: wrap; gap: 15px; }
         
         .navbar-custom { background-color: #212529; border-bottom: 1px solid #4a4850; padding: 0.5rem 1.5rem; }
-        .logo-dashboard { width: 90px; height: auto; transition: transform 0.3s; }
+        .logo-dashboard { width: 90px; height: auto; transition: transform 0.3s; cursor: pointer; }
         .logo-dashboard:hover { transform: scale(1.05); }
+        .brand-link { text-decoration: none; color: white !important; }
     </style>
 </head>
 <body class="text-light">
     <nav class="navbar navbar-dark navbar-custom mb-4">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <div>
+            <a href="{% url 'dashboard' %}" class="brand-link d-flex align-items-center gap-3">
                 <span class="navbar-brand mb-0 h4 fw-bold">Gestión CAB Systems</span>
-            </div>
+            </a>
             
             <div class="d-flex align-items-center gap-4">
                 {% if user.is_authenticated %}
@@ -33,11 +34,12 @@
                         <span class="fw-bold">{{ user.username }}</span>
                     </div>
                     <form action="{% url 'logout' %}" method="post" class="m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger btn-sm px-3">Cerrar sesión</button>
+                        {% csrf_token %}\r\n                        <button type="submit" class=\"btn btn-outline-danger btn-sm px-3\">Cerrar sesión</button>
                     </form>
                 {% endif %}
-                <img src="{% static 'img/logo.png' %}" alt="Logo CAB" class="logo-dashboard">
+                <a href="{% url 'dashboard' %}">
+                    <img src="{% static 'img/logo.png' %}" alt="Logo CAB" class="logo-dashboard">
+                </a>
             </div>
         </div>
     </nav>
