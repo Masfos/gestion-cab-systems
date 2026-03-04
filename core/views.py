@@ -34,9 +34,9 @@ def crear_orden(request):
         form = OrdenTrabajoForm(request.POST, request.FILES)
         if form.is_valid():
             orden = form.save(commit=False)
-            orden.cliente = orden.vehiculo.cliente
             orden.creado_por = request.user
             orden.save()
+            
             for f in request.FILES.getlist('fotos'): 
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("dashboard")
