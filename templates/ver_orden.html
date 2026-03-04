@@ -1,13 +1,42 @@
-<h4 class="text-info fw-bold mt-4">Evidencia Fotográfica</h4>
-<div class="d-flex flex-wrap gap-3 mt-3">
-    {% for img in orden.imagenes.all %}
-        <div class="card bg-dark border-secondary p-2 text-center" style="width: 200px;">
-            <img src="{{ img.imagen.url }}" class="img-fluid rounded mb-2" style="height: 140px; width: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src)">
-            <div class="d-grid">
-                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm fw-bold">⬇ Descargar</a>
-            </div>
+{% extends "base.html" %}
+{% block content %}
+<div class="card bg-dark-custom border-secondary p-4">
+    <h2 class="text-info fw-bold">Orden de Trabajo #{{ orden.id }}</h2>
+    <hr class="border-secondary">
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h5 class="text-secondary fw-bold">DATOS DEL VEHÍCULO</h5>
+            <p><strong>Patente:</strong> <span class="text-white">{{ orden.vehiculo.patente }}</span></p>
+            <p><strong>Marca/Modelo:</strong> {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</p>
+            <p><strong>Año:</strong> {{ orden.vehiculo.anio }}</p>
         </div>
-    {% empty %}
-        <p class="text-secondary">No hay imágenes adjuntas.</p>
-    {% endfor %}
+        <div class="col-md-6 border-start border-secondary">
+            <h5 class="text-secondary fw-bold">DATOS DEL CLIENTE</h5>
+            <p><strong>Nombre:</strong> {{ orden.vehiculo.cliente.nombre }}</p>
+            <p><strong>Teléfono:</strong> {{ orden.vehiculo.cliente.telefono }}</p>
+        </div>
+    </div>
+
+    <div class="bg-dark p-3 rounded border border-secondary mb-4">
+        <h5 class="text-info fw-bold">DESCRIPCIÓN DEL TRABAJO</h5>
+        <p class="mb-0">{{ orden.descripcion }}</p>
+    </div>
+
+    <h4 class="text-info fw-bold">EVIDENCIA FOTOGRÁFICA</h4>
+    <div class="d-flex flex-wrap gap-3 mt-3">
+        {% for img in orden.imagenes.all %}
+            <div class="card bg-secondary p-2 text-center" style="width: 220px;">
+                <img src="{{ img.imagen.url }}" class="img-fluid rounded mb-2 shadow-sm" style="height: 150px; object-fit: cover;">
+                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-info btn-sm fw-bold w-100">Descargar</a>
+            </div>
+        {% empty %}
+            <p class="text-muted italic">No se subieron fotos para esta orden.</p>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4 text-end">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary fw-bold">Volver al Dashboard</a>
+    </div>
 </div>
+{% endblock %}

@@ -1,5 +1,4 @@
-from django import forms
-from django.contrib.auth.models import User, Group
+from django import formsffrom django.contrib.auth.models import User, Group
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
 # --- PARCHE PARA SUBIDA MÚLTIPLE DE IMÁGENES ---
@@ -31,10 +30,21 @@ class ClienteForm(EstiloBaseForm):
         model = Cliente
         fields = ['nombre', 'telefono', 'email']
 
-class VehiculoForm(EstiloBaseForm):
+class VehiculoForm(forms.ModelForm):
     class Meta:
         model = Vehiculo
-        fields = ['cliente', 'patente', 'marca', 'modelo', 'anio']
+        fields = ['patente', 'marca', 'modelo', 'anio', 'cliente']
+        labels = {
+            'anio': 'Año', # AQUÍ CORREGIMOS EL NOMBRE
+        }
+
+class OrdenTrabajoForm(forms.ModelForm):
+    fotos = forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
+    
+    class Meta:
+        model = OrdenTrabajo
+        fields = ['vehiculo', 'descripcion', 'estado']
+        # Quitamos 'cliente' de aquí porque se asigna solo en la View
 
 class MaterialForm(EstiloBaseForm):
     class Meta:
@@ -85,4 +95,8 @@ class RegistroTrabajadorForm(forms.ModelForm):
             rol_nombre = self.cleaned_data.get('rol')
             grupo, _ = Group.objects.get_or_create(name=rol_nombre)
             user.groups.add(grupo)
+     if commit:
+            user.save()
+     if commit:
+            user.save()
         return user

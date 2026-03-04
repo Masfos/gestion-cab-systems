@@ -6,17 +6,14 @@ from .models import OrdenTrabajo, Cliente, Vehiculo, Material, ImagenOrden
 from .forms import OrdenTrabajoForm, ClienteForm, VehiculoForm, MaterialForm, RegistroTrabajadorForm
 import os
 
-# --- Utilidades de acceso ---
 def es_admin(user):
     return user.is_superuser or user.groups.filter(name="Administrador/a").exists()
 
-# --- Dashboard y Órdenes ---
 @login_required
 def dashboard(request):
-    ordenes = OrdenTrabajo.objects.all().order_by("-id")
     u = request.user
     ctx = {
-        "ordenes": ordenes,
+        "ordenes": OrdenTrabajo.objects.all().order_by("-id"),
         "es_admin": es_admin(u),
         "es_tecnico": u.groups.filter(name="Técnico/a").exists(),
         "es_mixto": u.groups.filter(name="Usuario Mixto").exists(),
@@ -25,6 +22,7 @@ def dashboard(request):
 
 @login_required
 def ver_orden(request, orden_id):
+    # Usamos prefetch_related para traer las imágenes vinculadas
     orden = get_object_or_404(OrdenTrabajo.objects.prefetch_related('imagenes'), id=orden_id)
     return render(request, "ver_orden.html", {"orden": orden})
 
@@ -34,15 +32,14 @@ def crear_orden(request):
         form = OrdenTrabajoForm(request.POST, request.FILES)
         if form.is_valid():
             orden = form.save(commit=False)
+            # LÓGICA AUTOMÁTICA DE CLIENTE
             orden.cliente = orden.vehiculo.cliente
             orden.creado_por = request.user
             orden.save()
             for f in request.FILES.getlist('fotos'): 
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("dashboard")
-    else:
-        form = OrdenTrabajoForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Nueva Orden"})
+    return render(request, "formulario.html", {"form": OrdenTrabajoForm(), "titulo": "Nueva Orden"})
 
 @login_required
 def editar_orden(request, orden_id):
@@ -56,23 +53,14 @@ def editar_orden(request, orden_id):
             for f in request.FILES.getlist('fotos'): 
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("dashboard")
-    else:
-        form = OrdenTrabajoForm(instance=orden)
-    return render(request, "formulario.html", {"form": form, "titulo": "Editar Orden"})
+    return render(request, "formulario.html", {"form": OrdenTrabajoForm(instance=orden), "titulo": "Editar Orden"})
 
+# --- FUNCIONES DE ELIMINACIÓN (Para evitar el crash de URLs) ---
 @login_required
 def eliminar_orden(request, orden_id):
     if not es_admin(request.user): return HttpResponseForbidden()
     get_object_or_404(OrdenTrabajo, id=orden_id).delete()
     return redirect("dashboard")
-
-# --- Gestión de Clientes ---
-@login_required
-def crear_cliente(request):
-    if request.method == "POST":
-        form = ClienteForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("dashboard")
-    return render(request, "formulario.html", {"form": ClienteForm(), "titulo": "Nuevo Cliente"})
 
 @login_required
 def eliminar_cliente(request, cliente_id):
@@ -80,21 +68,34 @@ def eliminar_cliente(request, cliente_id):
     get_object_or_404(Cliente, id=cliente_id).delete()
     return redirect("dashboard")
 
-# --- Gestión de Vehículos ---
-@login_required
-def crear_vehiculo(request):
-    if request.method == "POST":
-        form = VehiculoForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("dashboard")
-    return render(request, "formulario.html", {"form": VehiculoForm(), "titulo": "Nuevo Vehículo"})
-
 @login_required
 def eliminar_vehiculo(request, vehiculo_id):
     if not es_admin(request.user): return HttpResponseForbidden()
     get_object_or_404(Vehiculo, id=vehiculo_id).delete()
     return redirect("dashboard")
 
-# --- Inventario ---
+@login_required
+def eliminar_usuario(request, user_id):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    u = get_object_or_404(User, id=user_id)
+    if not u.is_superuser and u != request.user: u.delete()
+    return redirect("lista_usuarios")
+
+# --- RESTO DE VISTAS ---
+@login_required
+def crear_cliente(request):
+    if request.method == "POST":
+        form = ClienteForm(request.POST); 
+        if form.is_valid(): form.save(); return redirect("dashboard")
+    return render(request, "formulario.html", {"form": ClienteForm(), "titulo": "Nuevo Cliente"})
+
+@login_required
+def crear_vehiculo(request):
+    if request.method == "POST":
+        form = VehiculoForm(request.POST); 
+        if form.is_valid(): form.save(); return redirect("dashboard")
+    return render(request, "formulario.html", {"form": VehiculoForm(), "titulo": "Nuevo Vehículo"})
+
 @login_required
 def lista_materiales(request):
     q = request.GET.get("q", "")
@@ -104,11 +105,10 @@ def lista_materiales(request):
 @login_required
 def agregar_material(request):
     if request.method == "POST":
-        form = MaterialForm(request.POST)
+        form = MaterialForm(request.POST); 
         if form.is_valid(): form.save(); return redirect("lista_materiales")
     return render(request, "formulario.html", {"form": MaterialForm(), "titulo": "Registrar Material"})
 
-# --- Personal ---
 @login_required
 def lista_usuarios(request):
     if not es_admin(request.user): return HttpResponseForbidden()
@@ -118,22 +118,11 @@ def lista_usuarios(request):
 def registrar_usuario(request):
     if not es_admin(request.user): return HttpResponseForbidden()
     if request.method == "POST":
-        form = RegistroTrabajadorForm(request.POST)
+        form = RegistroTrabajadorForm(request.POST); 
         if form.is_valid(): form.save(); return redirect("lista_usuarios")
     return render(request, "formulario.html", {"form": RegistroTrabajadorForm(), "titulo": "Nuevo Trabajador"})
 
 @login_required
-def eliminar_usuario(request, user_id):
-    if not es_admin(request.user): return HttpResponseForbidden()
-    u = get_object_or_404(User, id=user_id)
-    if not u.is_superuser and u != request.user: u.delete()
-    return redirect("lista_usuarios")
-
-# --- Multimedia y Descargas ---
-@login_required
 def descargar_imagen(request, imagen_id):
     img = get_object_or_404(ImagenOrden, id=imagen_id)
-    try:
-        return FileResponse(img.imagen.open('rb'), as_attachment=True, filename=os.path.basename(img.imagen.name))
-    except:
-        raise Http404("Archivo no encontrado")
+    return FileResponse(img.imagen.open('rb'), as_attachment=True)
