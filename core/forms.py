@@ -31,7 +31,7 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'telefono', 'email']
+        fields = ['nombre', 'empresa', 'telefono', 'email']
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:

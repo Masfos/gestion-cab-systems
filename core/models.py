@@ -6,6 +6,7 @@ from django.db import transaction
 # Registro cliente
 class Cliente(models.Model):
     nombre = models.CharField(max_length=150)
+    empresa = models.CharField(max_length=150, blank=True, null=True)
     telefono = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
 
