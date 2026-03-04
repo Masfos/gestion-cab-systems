@@ -44,16 +44,17 @@ class MaterialForm(EstiloBaseForm):
         fields = ['nombre', 'descripcion', 'stock']
 
 
-class OrdenTrabajoForm(EstiloBaseForm):
+class OrdenTrabajoForm(forms.ModelForm):
     class Meta:
         model = OrdenTrabajo
         fields = ['vehiculo', 'descripcion', 'estado']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
+            'descripcion': forms.Textarea(attrs={'rows': 4}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Esto garantiza que veas Cliente y Empresa en el selector
         self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
 
 
