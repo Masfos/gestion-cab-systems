@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden, FileResponse
+from django.http import HttpResponseForbidden, FileResponse, Http404
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material, ImagenOrden
 from .forms import OrdenTrabajoForm, ClienteForm, VehiculoForm, MaterialForm, RegistroTrabajadorForm
+import os
 
 # --- SEGURIDAD ---
 def es_admin(user):
@@ -68,23 +69,11 @@ def crear_cliente(request):
     return render(request, "formulario.html", {"form": ClienteForm(), "titulo": "Nuevo Cliente"})
 
 @login_required
-def eliminar_cliente(request, cliente_id):
-    if not es_admin(request.user): return HttpResponseForbidden()
-    get_object_or_404(Cliente, id=cliente_id).delete()
-    return redirect("dashboard")
-
-@login_required
 def crear_vehiculo(request):
     if request.method == "POST":
         form = VehiculoForm(request.POST)
         if form.is_valid(): form.save(); return redirect("dashboard")
     return render(request, "formulario.html", {"form": VehiculoForm(), "titulo": "Nuevo Vehículo"})
-
-@login_required
-def eliminar_vehiculo(request, vehiculo_id):
-    if not es_admin(request.user): return HttpResponseForbidden()
-    get_object_or_404(Vehiculo, id=vehiculo_id).delete()
-    return redirect("dashboard")
 
 # --- MATERIALES ---
 @login_required
@@ -114,14 +103,11 @@ def registrar_usuario(request):
         if form.is_valid(): form.save(); return redirect("lista_usuarios")
     return render(request, "formulario.html", {"form": RegistroTrabajadorForm(), "titulo": "Nuevo Trabajador"})
 
-@login_required
-def eliminar_usuario(request, user_id):
-    if not es_admin(request.user): return HttpResponseForbidden()
-    u = get_object_or_404(User, id=user_id)
-    if not u.is_superuser and u != request.user: u.delete()
-    return redirect("lista_usuarios")
-
+# --- DESCARGA Y MULTIMEDIA ---
 @login_required
 def descargar_imagen(request, imagen_id):
     img = get_object_or_404(ImagenOrden, id=imagen_id)
-    return FileResponse(img.imagen.open(), as_attachment=True)
+    try:
+        return FileResponse(img.imagen.open('rb'), as_attachment=True, filename=os.path.basename(img.imagen.name))
+    except Exception:
+        raise Http404("El archivo no existe en el servidor.")

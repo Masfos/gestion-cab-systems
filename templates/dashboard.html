@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-info">Panel de Control</h2>
+    <h2 class="text-info fw-bold">Panel de Control</h2>
 </div>
 
 <div class="d-flex gap-2 flex-wrap mb-4">
@@ -16,28 +16,29 @@
     {% endif %}
 </div>
 
-<input type="text" id="busc" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Buscar...">
+<input type="text" id="busc" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Buscar por patente o cliente...">
 
 <div class="table-responsive">
     <table class="table table-hover align-middle" id="tabla">
         <thead class="table-dark">
             <tr>
-                <th>ID</th><th>Vehículo</th><th>Estado</th><th class="text-center">Acciones</th>
+                <th class="fw-bold">ID</th><th class="fw-bold">Vehículo</th><th class="fw-bold">Estado</th><th class="text-center fw-bold">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for o in ordenes %}
             <tr>
-                <td>#{{ o.id }}</td>
+                <td class="fw-bold">#{{ o.id }}</td>
                 <td>{{ o.vehiculo.patente }}</td>
-                <td><span class="badge bg-primary px-3">{{ o.get_estado_display }}</span></td>
+                <td><span class="badge bg-primary px-3 fw-bold">{{ o.get_estado_display }}</span></td>
                 <td class="text-center">
                     <div class="btn-group">
                         <a href="{% url 'ver_orden' o.id %}" class="btn btn-info btn-sm fw-bold">Ver</a>
                         <a href="{% url 'editar_orden' o.id %}" class="btn btn-warning btn-sm fw-bold text-dark">Editar</a>
                         {% if es_admin %}
-                        <form action="{% url 'eliminar_orden' o.id %}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar orden?')">
-                            {% csrf_token %}<button class="btn btn-danger btn-sm fw-bold">X</button>
+                        <form action="{% url 'eliminar_orden' o.id %}" method="POST" class="d-inline" onsubmit="return confirm('¿Confirmas eliminar esta orden?')">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm fw-bold">Eliminar</button>
                         </form>
                         {% endif %}
                     </div>
