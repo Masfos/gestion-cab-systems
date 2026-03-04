@@ -1,13 +1,126 @@
-<h4 class="text-info fw-bold mt-4">Evidencia Fotográfica</h4>
-<div class="d-flex flex-wrap gap-3 mt-3">
-    {% for img in orden.imagenes.all %}
-        <div class="card bg-dark border-secondary p-2 text-center" style="width: 200px;">
-            <img src="{{ img.imagen.url }}" class="img-fluid rounded mb-2" style="height: 140px; width: 100%; object-fit: cover; cursor: pointer;" onclick="window.open(this.src)">
-            <div class="d-grid">
-                <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm fw-bold">⬇ Descargar</a>
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg mb-4" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
+            <div class="card-body p-5">
+
+                <!-- Encabezado -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold m-0 text-info">Orden #{{ orden.id }}</h2>
+                    <span class="badge fs-5 px-4 py-2
+                        {% if orden.estado == 'pendiente' %}bg-warning text-dark
+                        {% elif orden.estado == 'en_proceso' %}bg-primary
+                        {% elif orden.estado == 'finalizado' %}bg-success
+                        {% elif orden.estado == 'entregado' %}bg-info text-dark
+                        {% elif orden.estado == 'cancelado' %}bg-danger
+                        {% endif %}">
+                        {{ orden.get_estado_display|upper }}
+                    </span>
+                </div>
+                <hr class="border-secondary">
+
+                <!-- Cliente y Vehículo -->
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-4">
+                        <h5 class="text-info fw-bold">Cliente</h5>
+                        <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
+                            <p class="mb-1"><strong>{{ orden.cliente.nombre }}</strong></p>
+                            {% if orden.cliente.empresa %}
+                            <p class="mb-1 text-warning small">{{ orden.cliente.empresa }}</p>
+                            {% endif %}
+                            {% if orden.cliente.telefono %}
+                            <p class="mb-0 small text-secondary">📞 {{ orden.cliente.telefono }}</p>
+                            {% endif %}
+                            {% if orden.cliente.email %}
+                            <p class="mb-0 small text-secondary">✉️ {{ orden.cliente.email }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h5 class="text-info fw-bold">Vehículo</h5>
+                        <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
+                            <p class="mb-1"><strong>{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</strong></p>
+                            {% if orden.vehiculo.anio %}
+                            <p class="mb-0 small text-secondary">📅 Año: {{ orden.vehiculo.anio }}</p>
+                            {% endif %}
+                            <p class="mb-0 small text-secondary">🔖 Patente: {{ orden.vehiculo.patente }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mt-2 mb-4">
+                    <h5 class="text-info fw-bold">Descripción del Trabajo</h5>
+                    <p class="p-3 rounded text-light" style="background-color: #39373d; border: 1px solid #5a5860; white-space: pre-wrap;">{{ orden.descripcion }}</p>
+                </div>
+
+                <!-- Fechas y Responsables -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <h5 class="text-info fw-bold">Fechas</h5>
+                        <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
+                            <p class="mb-1 small"><span class="text-secondary">Creación:</span> {{ orden.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                            <p class="mb-0 small"><span class="text-secondary">Última modificación:</span> {{ orden.fecha_modificacion|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h5 class="text-info fw-bold">Responsables</h5>
+                        <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
+                            <p class="mb-1 small"><span class="text-secondary">Creado por:</span> {{ orden.creado_por.username|default:"—" }}</p>
+                            <p class="mb-0 small"><span class="text-secondary">Modificado por:</span> {{ orden.modificado_por.username|default:"—" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materiales -->
+                <hr class="border-secondary my-4">
+                <h5 class="text-info fw-bold mb-3">Materiales y Repuestos</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-dark border-secondary align-middle">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in orden.materiales_usados.all %}
+                            <tr>
+                                <td>{{ item.material.nombre }}</td>
+                                <td>{{ item.cantidad }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" class="text-muted text-center small">Sin materiales registrados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Imágenes -->
+                <hr class="border-secondary my-4">
+                <h5 class="text-info fw-bold mb-3">Evidencia Fotográfica</h5>
+                <div class="d-flex flex-wrap gap-3">
+                    {% for img in orden.imagenes.all %}
+                    <div class="card bg-dark border-secondary p-2 text-center" style="width: 200px;">
+                        <img src="{{ img.imagen.url }}" class="img-fluid rounded mb-2"
+                            style="height: 140px; width: 100%; object-fit: cover; cursor: pointer;"
+                            onclick="window.open(this.src)">
+                        <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm fw-bold">⬇ Descargar</a>
+                    </div>
+                    {% empty %}
+                    <p class="text-secondary small">Sin imágenes adjuntas.</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Botones -->
+                <div class="text-center mt-5 d-flex justify-content-center gap-3">
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-light px-4">← Volver</a>
+                    <a href="{% url 'editar_orden' orden.id %}" class="btn btn-primary px-4">✏️ Editar Orden</a>
+                </div>
+
             </div>
         </div>
-    {% empty %}
-        <p class="text-secondary">No hay imágenes adjuntas.</p>
-    {% endfor %}
+    </div>
 </div>
+{% endblock %}
