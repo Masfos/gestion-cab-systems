@@ -10,7 +10,7 @@ import os
 def es_admin(user):
     return user.is_superuser or user.groups.filter(name="Administrador/a").exists()
 
-# --- DASHBOARD Y ÓRDENES ---
+# --- DASHBOARD ---
 @login_required
 def dashboard(request):
     u = request.user
@@ -22,6 +22,7 @@ def dashboard(request):
     }
     return render(request, "dashboard.html", ctx)
 
+# --- GESTIÓN DE ÓRDENES ---
 @login_required
 def ver_orden(request, orden_id):
     orden = get_object_or_404(OrdenTrabajo.objects.prefetch_related('imagenes'), id=orden_id)
@@ -38,7 +39,7 @@ def crear_orden(request):
             for f in request.FILES.getlist('fotos'): 
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("dashboard")
-    return render(request, "formulario.html", {"form": OrdenTrabajoForm(), "titulo": "Nueva Orden"})
+    return render(request, "formulario.html", {"form": OrdenTrabajoForm(), "titulo": "Nueva Orden de Trabajo"})
 
 @login_required
 def editar_orden(request, orden_id):
@@ -60,7 +61,39 @@ def eliminar_orden(request, orden_id):
     get_object_or_404(OrdenTrabajo, id=orden_id).delete()
     return redirect("dashboard")
 
-# --- MATERIALES ---
+# --- GESTIÓN DE CLIENTES ---
+@login_required
+def crear_cliente(request):
+    if request.method == "POST":
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    return render(request, "formulario.html", {"form": ClienteForm(), "titulo": "Registrar Cliente"})
+
+@login_required
+def eliminar_cliente(request, cliente_id):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    get_object_or_404(Cliente, id=cliente_id).delete()
+    return redirect("dashboard")
+
+# --- GESTIÓN DE VEHÍCULOS ---
+@login_required
+def crear_vehiculo(request):
+    if request.method == "POST":
+        form = VehiculoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    return render(request, "formulario.html", {"form": VehiculoForm(), "titulo": "Registrar Vehículo"})
+
+@login_required
+def eliminar_vehiculo(request, vehiculo_id):
+    if not es_admin(request.user): return HttpResponseForbidden()
+    get_object_or_404(Vehiculo, id=vehiculo_id).delete()
+    return redirect("dashboard")
+
+# --- MATERIALES (INVENTARIO) ---
 @login_required
 def lista_materiales(request):
     q = request.GET.get("q", "")
@@ -71,8 +104,10 @@ def lista_materiales(request):
 def agregar_material(request):
     if request.method == "POST":
         form = MaterialForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("lista_materiales")
-    return render(request, "formulario.html", {"form": MaterialForm(), "titulo": "Registrar Nuevo Material"})
+        if form.is_valid():
+            form.save()
+            return redirect("lista_materiales")
+    return render(request, "formulario.html", {"form": MaterialForm(), "titulo": "Registrar Material"})
 
 # --- GESTIÓN DE PERSONAL (USUARIOS) ---
 @login_required
@@ -85,7 +120,9 @@ def registrar_usuario(request):
     if not es_admin(request.user): return HttpResponseForbidden()
     if request.method == "POST":
         form = RegistroTrabajadorForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("lista_usuarios")
+        if form.is_valid():
+            form.save()
+            return redirect("lista_usuarios")
     return render(request, "formulario.html", {"form": RegistroTrabajadorForm(), "titulo": "Nuevo Trabajador"})
 
 @login_required
@@ -96,11 +133,12 @@ def eliminar_usuario(request, user_id):
         u.delete()
     return redirect("lista_usuarios")
 
-# --- MULTIMEDIA Y DESCARGAS ---
+# --- MULTIMEDIA (DESCARGAS) ---
 @login_required
 def descargar_imagen(request, imagen_id):
     img = get_object_or_404(ImagenOrden, id=imagen_id)
     try:
+        # Modo 'rb' (lectura binaria) para evitar errores 500 en el servidor
         return FileResponse(img.imagen.open('rb'), as_attachment=True, filename=os.path.basename(img.imagen.name))
     except Exception:
-        raise Http404("Archivo no encontrado")
+        raise Http404("El archivo no se encuentra en el servidor.")
