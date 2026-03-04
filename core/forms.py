@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User, Group
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material, MaterialUsado
 
@@ -48,16 +49,18 @@ class VehiculoForm(EstiloBaseForm):
         }
 
 class MaterialForm(EstiloBaseForm):
+    stock = forms.IntegerField(
+        validators=[MinValueValidator(0, message='El stock no puede ser negativo.')],
+        widget=forms.NumberInput(attrs={
+            'min': '0',
+            'class': 'form-control bg-dark text-white border-secondary',
+            'style': 'border-radius: 10px; padding: 12px;'
+        })
+    )
+
     class Meta:
         model = Material
         fields = ['nombre', 'descripcion', 'stock']
-        widgets = {
-            'stock': forms.NumberInput(attrs={
-                'min': '0',
-                'class': 'form-control bg-dark text-white border-secondary',
-                'style': 'border-radius: 10px; padding: 12px;'
-            }),
-        }
 
 class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
