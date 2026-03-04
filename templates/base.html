@@ -3,51 +3,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión CAB Systems</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #39373d; }
-        .bg-dark-custom { background-color: #39373d; }
-        .table { background-color: #4a4850; color: white; border-radius: 8px; overflow: hidden; }
-        .card-imagen { background: #4a4850; padding: 10px; border-radius: 8px; width: 220px; }
-        .card-imagen img { width: 100%; border-radius: 6px; }
-        .galeria { display: flex; flex-wrap: wrap; gap: 15px; }
-        
+        body { background-color: #39373d; color: white; }
         .navbar-custom { background-color: #212529; border-bottom: 1px solid #4a4850; padding: 0.5rem 1.5rem; }
-        .logo-dashboard { width: 90px; height: auto; transition: transform 0.3s; cursor: pointer; }
+        .logo-dashboard { width: 90px; cursor: pointer; transition: 0.3s; }
         .logo-dashboard:hover { transform: scale(1.05); }
         .brand-link { text-decoration: none; color: white !important; }
+        .table { background-color: #4a4850; color: white; border-radius: 8px; }
     </style>
 </head>
-<body class="text-light">
+<body>
     <nav class="navbar navbar-dark navbar-custom mb-4">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <a href="{% url 'dashboard' %}" class="brand-link d-flex align-items-center gap-3">
-                <span class="navbar-brand mb-0 h4 fw-bold">Gestión CAB Systems</span>
+            <a href="{% url 'dashboard' %}" class="brand-link">
+                <span class="h4 fw-bold">Gestión CAB Systems</span>
             </a>
-            
             <div class="d-flex align-items-center gap-4">
                 {% if user.is_authenticated %}
-                    <div class="text-end d-none d-md-block">
-                        <small class="text-secondary d-block">Sesión de:</small>
-                        <span class="fw-bold">{{ user.username }}</span>
-                    </div>
+                    <span class="fw-bold d-none d-md-block">{{ user.username }}</span>
                     <form action="{% url 'logout' %}" method="post" class="m-0">
-                        {% csrf_token %}\r\n                        <button type="submit" class=\"btn btn-outline-danger btn-sm px-3\">Cerrar sesión</button>
+                        {% csrf_token %}<button type="submit" class="btn btn-outline-danger btn-sm">Salir</button>
                     </form>
                 {% endif %}
                 <a href="{% url 'dashboard' %}">
-                    <img src="{% static 'img/logo.png' %}" alt="Logo CAB" class="logo-dashboard">
+                    <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-dashboard">
                 </a>
             </div>
         </div>
     </nav>
-
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="container">{% block content %}{% endblock %}</div>
 </body>
 </html>
