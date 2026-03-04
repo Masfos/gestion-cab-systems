@@ -1,26 +1,25 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
-from django.http import HttpResponseForbidden, FileResponse, Http404
+from django.http import HttpResponseForbidden, FileResponse
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material, ImagenOrden
 from .forms import (
     OrdenTrabajoForm, ClienteForm, VehiculoForm, 
     MaterialForm, RegistroTrabajadorForm
 )
-import os
 
 # --- Utilidades ---
 def es_admin(user):
     return user.is_superuser or user.groups.filter(name="Administrador").exists()
 
-# --- Dashboard y Órdenes ---
+# --- Dashboard ---
 
 @login_required
 def dashboard(request):
     ordenes = OrdenTrabajo.objects.all().order_by("-id")
     u = request.user
     
-    # Contadores para las tarjetas (Evita el Error 500)
+    # CALCULOS DE MÉTRICAS (Esto soluciona el Error 500)
     en_proceso_count = ordenes.filter(estado='en_proceso').count()
     terminadas_count = ordenes.filter(estado='terminado').count()
     
@@ -34,6 +33,8 @@ def dashboard(request):
     }
     return render(request, "dashboard.html", ctx)
 
+# --- Órdenes de Trabajo ---
+
 @login_required
 def crear_orden(request):
     if request.method == "POST":
@@ -43,7 +44,7 @@ def crear_orden(request):
             orden.creado_por = request.user
             orden.save()
             
-            # Lógica para múltiples fotos
+            # Guardar múltiples fotos desde el widget MultipleFileInput
             fotos = request.FILES.getlist('fotos')
             for f in fotos:
                 ImagenOrden.objects.create(orden=orden, imagen=f)
@@ -65,7 +66,7 @@ def editar_orden(request, orden_id):
         form = OrdenTrabajoForm(request.POST, request.FILES, instance=orden)
         if form.is_valid():
             form.save()
-            # Fotos adicionales en edición
+            # Fotos nuevas en edición
             for f in request.FILES.getlist('fotos_adicionales'):
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("ver_orden", orden_id=orden.id)
@@ -80,7 +81,7 @@ def eliminar_orden(request, orden_id):
     orden.delete()
     return redirect("dashboard")
 
-# --- Gestión de Clientes y Vehículos ---
+# --- Clientes y Vehículos ---
 
 @login_required
 def crear_cliente(request):
@@ -104,7 +105,7 @@ def crear_vehiculo(request):
         form = VehiculoForm()
     return render(request, "vehiculo_form.html", {"form": form})
 
-# --- Usuarios y Personal ---
+# --- Personal ---
 
 @login_required
 def lista_usuarios(request):
@@ -119,10 +120,9 @@ def registrar_usuario(request):
         form = RegistroTrabajadorForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Asignar grupo según el formulario
-            nombre_grupo = request.POST.get('rol')
-            if nombre_grupo:
-                grupo, _ = Group.objects.get_or_create(name=nombre_grupo)
+            rol = request.POST.get('rol')
+            if rol:
+                grupo, _ = Group.objects.get_or_create(name=rol)
                 user.groups.add(grupo)
             return redirect("lista_usuarios")
     else:
@@ -137,7 +137,7 @@ def eliminar_usuario(request, user_id):
         u.delete()
     return redirect("lista_usuarios")
 
-# --- Inventario ---
+# --- Materiales e Imágenes ---
 
 @login_required
 def lista_materiales(request):
@@ -154,8 +154,6 @@ def agregar_material(request):
     else:
         form = MaterialForm()
     return render(request, "formulario.html", {"form": form, "titulo": "Registrar Material"})
-
-# --- Multimedia ---
 
 @login_required
 def descargar_imagen(request, imagen_id):

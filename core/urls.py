@@ -9,7 +9,7 @@ urlpatterns = [
     path('usuarios/registrar/', views.registrar_usuario, name='registrar_usuario'),
     path('usuarios/eliminar/<int:user_id>/', views.eliminar_usuario, name='eliminar_usuario'),
     
-    # Órdenes
+    # Órdenes de Trabajo
     path('orden/crear/', views.crear_orden, name='crear_orden'),
     path('orden/ver/<int:orden_id>/', views.ver_orden, name='ver_orden'),
     path('orden/editar/<int:orden_id>/', views.editar_orden, name='editar_orden'),
