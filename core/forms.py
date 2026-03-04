@@ -31,32 +31,35 @@ class EstiloBaseForm(forms.ModelForm):
 class ClienteForm(EstiloBaseForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'empresa', 'telefono', 'email']
+        fields = ['nombre', 'telefono', 'email']
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
         fields = ['cliente', 'patente', 'marca', 'modelo', 'anio']
+        labels = {
+            'anio': 'Año',
+        }
 
 class MaterialForm(EstiloBaseForm):
     class Meta:
         model = Material
         fields = ['nombre', 'descripcion', 'stock']
+        widgets = {
+            'stock': forms.NumberInput(attrs={'min': '0', 'class': 'form-control bg-dark text-white border-secondary', 'style': 'border-radius: 10px; padding: 12px;'}),
+        }
 
 
 class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
-        fields = ['cliente', 'vehiculo', 'descripcion', 'estado']
+        fields = ['vehiculo', 'descripcion', 'estado']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['cliente'].queryset = Cliente.objects.order_by('-id')
-        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.empresa})" if obj.empresa else obj.nombre
-        self.fields['vehiculo'].queryset = Vehiculo.objects.order_by('-id')
         self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
 
 
