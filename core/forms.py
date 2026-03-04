@@ -2,7 +2,6 @@ from django import forms
 from django.contrib.auth.models import User, Group
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material
 
-# --- PARCHE PARA SUBIDA MÚLTIPLE DE IMÁGENES ---
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
@@ -42,7 +41,6 @@ class MaterialForm(EstiloBaseForm):
         fields = ['nombre', 'descripcion', 'stock']
 
 class OrdenTrabajoForm(EstiloBaseForm):
-    # Campo personalizado para fotos múltiples
     fotos = MultipleFileField(required=False, label="Evidencia Fotográfica")
 
     class Meta:
@@ -52,7 +50,6 @@ class OrdenTrabajoForm(EstiloBaseForm):
             'descripcion': forms.Textarea(attrs={'rows': 4}),
         }
 
-# FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):
     password = forms.CharField(
         label="Contraseña",
@@ -79,10 +76,21 @@ class RegistroTrabajadorForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"]) # Encripta la clave
+        user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
             rol_nombre = self.cleaned_data.get('rol')
             grupo, _ = Group.objects.get_or_create(name=rol_nombre)
             user.groups.add(grupo)
         return user
+
+class OrdenTrabajoForm(forms.ModelForm):
+    fotos = forms.ImageField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True}), 
+        required=False,
+        label='Evidencia Fotográfica'
+    )
+    
+    class Meta:
+        model = OrdenTrabajo
+        fields = ['vehiculo', 'descripcion', 'estado']
