@@ -10,15 +10,16 @@ import os
 def es_admin(user):
     return user.is_superuser or user.groups.filter(name="Administrador/a").exists()
 
-# --- Dashboard y Órdenes ---
+# --- Dashboard ---
 @login_required
 def dashboard(request):
-    ordenes = OrdenTrabajo.objects.all().order_by("-id")
     u = request.user
     ctx = {
-        "ordenes": ordenes,
+        "ordenes": OrdenTrabajo.objects.all().order_by("-id"),
+        "clientes": Cliente.objects.all().order_by("-id"),
+        "vehiculos": Vehiculo.objects.all().order_by("-id"),
         "es_admin": es_admin(u),
-        "es_tecnico": u.groups.filter(name="Técnico/a").exists(),
+        "es_tecnico": u.groups.filter(name="Tecnico/a").exists(),
         "es_mixto": u.groups.filter(name="Usuario Mixto").exists(),
     }
     return render(request, "dashboard.html", ctx)
@@ -34,10 +35,9 @@ def crear_orden(request):
         form = OrdenTrabajoForm(request.POST, request.FILES)
         if form.is_valid():
             orden = form.save(commit=False)
-            orden.cliente = orden.vehiculo.cliente
             orden.creado_por = request.user
             orden.save()
-            for f in request.FILES.getlist('fotos'): 
+            for f in request.FILES.getlist('fotos'):
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("dashboard")
     else:
@@ -53,7 +53,7 @@ def editar_orden(request, orden_id):
             orden = form.save(commit=False)
             orden.modificado_por = request.user
             orden.save()
-            for f in request.FILES.getlist('fotos'): 
+            for f in request.FILES.getlist('fotos'):
                 ImagenOrden.objects.create(orden=orden, imagen=f)
             return redirect("dashboard")
     else:
@@ -66,13 +66,29 @@ def eliminar_orden(request, orden_id):
     get_object_or_404(OrdenTrabajo, id=orden_id).delete()
     return redirect("dashboard")
 
-# --- Gestión de Clientes ---
+# --- Clientes ---
 @login_required
 def crear_cliente(request):
     if request.method == "POST":
         form = ClienteForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("dashboard")
-    return render(request, "formulario.html", {"form": ClienteForm(), "titulo": "Nuevo Cliente"})
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    else:
+        form = ClienteForm()
+    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Cliente"})
+
+@login_required
+def editar_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    if request.method == "POST":
+        form = ClienteForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    else:
+        form = ClienteForm(instance=cliente)
+    return render(request, "formulario.html", {"form": form, "titulo": "Editar Cliente"})
 
 @login_required
 def eliminar_cliente(request, cliente_id):
@@ -80,13 +96,29 @@ def eliminar_cliente(request, cliente_id):
     get_object_or_404(Cliente, id=cliente_id).delete()
     return redirect("dashboard")
 
-# --- Gestión de Vehículos ---
+# --- Vehiculos ---
 @login_required
 def crear_vehiculo(request):
     if request.method == "POST":
         form = VehiculoForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("dashboard")
-    return render(request, "formulario.html", {"form": VehiculoForm(), "titulo": "Nuevo Vehículo"})
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    else:
+        form = VehiculoForm()
+    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Vehiculo"})
+
+@login_required
+def editar_vehiculo(request, vehiculo_id):
+    vehiculo = get_object_or_404(Vehiculo, id=vehiculo_id)
+    if request.method == "POST":
+        form = VehiculoForm(request.POST, instance=vehiculo)
+        if form.is_valid():
+            form.save()
+            return redirect("dashboard")
+    else:
+        form = VehiculoForm(instance=vehiculo)
+    return render(request, "formulario.html", {"form": form, "titulo": "Editar Vehiculo"})
 
 @login_required
 def eliminar_vehiculo(request, vehiculo_id):
@@ -99,14 +131,18 @@ def eliminar_vehiculo(request, vehiculo_id):
 def lista_materiales(request):
     q = request.GET.get("q", "")
     mats = Material.objects.filter(nombre__icontains=q) if q else Material.objects.all()
-    return render(request, "lista_materiales.html", {"materiales": mats})
+    return render(request, "lista_materiales.html", {"materiales": mats, "q": q})
 
 @login_required
 def agregar_material(request):
     if request.method == "POST":
         form = MaterialForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("lista_materiales")
-    return render(request, "formulario.html", {"form": MaterialForm(), "titulo": "Registrar Material"})
+        if form.is_valid():
+            form.save()
+            return redirect("lista_materiales")
+    else:
+        form = MaterialForm()
+    return render(request, "formulario.html", {"form": form, "titulo": "Registrar Material"})
 
 # --- Personal ---
 @login_required
@@ -119,17 +155,22 @@ def registrar_usuario(request):
     if not es_admin(request.user): return HttpResponseForbidden()
     if request.method == "POST":
         form = RegistroTrabajadorForm(request.POST)
-        if form.is_valid(): form.save(); return redirect("lista_usuarios")
-    return render(request, "formulario.html", {"form": RegistroTrabajadorForm(), "titulo": "Nuevo Trabajador"})
+        if form.is_valid():
+            form.save()
+            return redirect("lista_usuarios")
+    else:
+        form = RegistroTrabajadorForm()
+    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Trabajador"})
 
 @login_required
 def eliminar_usuario(request, user_id):
     if not es_admin(request.user): return HttpResponseForbidden()
     u = get_object_or_404(User, id=user_id)
-    if not u.is_superuser and u != request.user: u.delete()
+    if not u.is_superuser and u != request.user:
+        u.delete()
     return redirect("lista_usuarios")
 
-# --- Multimedia y Descargas ---
+# --- Multimedia ---
 @login_required
 def descargar_imagen(request, imagen_id):
     img = get_object_or_404(ImagenOrden, id=imagen_id)
@@ -145,9 +186,9 @@ def agregar_material_orden(request, orden_id):
     if request.method == "POST":
         form = MaterialUsadoForm(request.POST)
         if form.is_valid():
-            material_usado = form.save(commit=False)
-            material_usado.orden = orden
-            material_usado.save()
+            item = form.save(commit=False)
+            item.orden = orden
+            item.save()
             return redirect("ver_orden", orden_id=orden.id)
     else:
         form = MaterialUsadoForm()
@@ -167,8 +208,7 @@ def editar_material_orden(request, item_id):
 
 @login_required
 def eliminar_material_orden(request, item_id):
-    if not es_admin(request.user):
-        return HttpResponseForbidden()
+    if not es_admin(request.user): return HttpResponseForbidden()
     item = get_object_or_404(MaterialUsado, id=item_id)
     orden_id = item.orden.id
     item.delete()

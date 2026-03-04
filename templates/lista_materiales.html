@@ -1,19 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-info fw-bold">Inventario</h2>
-    <a href="{% url 'agregar_material' %}" class="btn btn-success fw-bold">➕ Registrar Material</a>
+<div class="seccion-tabla" style="background-color: #4a4850; border-radius: 12px; padding: 20px; border: 1px solid #5a5860;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-info fw-bold m-0">📦 Inventario</h2>
+        <a href="{% url 'agregar_material' %}" class="btn btn-success fw-bold">➕ Registrar Material</a>
+    </div>
+
+    <input type="text" id="buscadorMaterial" class="form-control bg-dark text-white border-secondary mb-3"
+        placeholder="Buscar material..." value="{{ q }}"
+        onkeyup="filtrarMateriales(this)">
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" id="tablaMateriales">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in materiales %}
+                <tr>
+                    <td class="fw-bold text-info">{{ m.nombre }}</td>
+                    <td class="text-secondary small">{{ m.descripcion|default:"—" }}</td>
+                    <td>
+                        <span class="badge {% if m.stock == 0 %}bg-danger{% elif m.stock < 5 %}bg-warning text-dark{% else %}bg-success{% endif %} px-3">
+                            {{ m.stock }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center text-secondary">Sin materiales registrados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="table-dark">
-            <tr><th class="fw-bold">Nombre</th><th class="fw-bold">Stock</th></tr>
-        </thead>
-        <tbody>
-            {% for m in materiales %}
-            <tr><td class="fw-bold text-info">{{ m.nombre }}</td><td>{{ m.stock }}</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+
+<script>
+function filtrarMateriales(input) {
+    const filtro = input.value.toLowerCase();
+    document.querySelectorAll('#tablaMateriales tbody tr').forEach(tr => {
+        tr.style.display = tr.innerText.toLowerCase().includes(filtro) ? '' : 'none';
+    });
+}
+</script>
 {% endblock %}
