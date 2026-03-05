@@ -31,14 +31,13 @@ urlpatterns = [
     path('materiales/agregar/', views.agregar_material, name='agregar_material'),
 
     # Materiales en Orden
-    path('orden/<int:orden_id>/material/agregar/', views.agregar_material_orden, name='agregar_material'),
-    path('material/<int:item_id>/editar/', views.editar_material_orden, name='editar_material'),
-    path('material/<int:item_id>/eliminar/', views.eliminar_material_orden, name='eliminar_material'),
+    path('orden/<int:orden_id>/material/agregar/', views.agregar_material_orden, name='agregar_material_orden'),
+    path('material/<int:item_id>/editar/', views.editar_material_orden, name='editar_material_orden'),
+    path('material/<int:item_id>/eliminar/', views.eliminar_material_orden, name='eliminar_material_orden'),
 
     # Imagenes
     path('imagen/descargar/<int:imagen_id>/', views.descargar_imagen, name='descargar_imagen'),
     path('ajax/vehiculos/', views.vehiculos_por_cliente, name='ajax_vehiculos'),
     path('materiales/editar/<int:material_id>/', views.editar_material_bodega, name='editar_material_bodega'),
     path('materiales/eliminar/<int:material_id>/', views.eliminar_material, name='eliminar_material_bodega'),
-    path('materiales/editar/<int:material_id>/', views.editar_material_bodega, name='editar_material_bodega'),
 ]
