@@ -57,6 +57,43 @@
                     </div>
                     {% endif %}
 
+                    {% if titulo == "Editar Orden" and orden %}
+                    <hr class="border-secondary my-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <label class="mb-0">Materiales y Repuestos</label>
+                        <a href="{% url 'agregar_material_orden' orden.id %}" class="btn btn-sm btn-outline-info fw-bold">+ Añadir</a>
+                    </div>
+                    <div class="table-responsive mb-2">
+                        <table class="table table-dark border-secondary align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Cantidad</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in orden.materiales_usados.all %}
+                                <tr>
+                                    <td>{{ item.material.nombre }}</td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td class="text-center">
+                                        <a href="{% url 'editar_material_orden' item.id %}" class="btn btn-sm btn-warning">✏️</a>
+                                        <form action="{% url 'eliminar_material_orden' item.id %}" method="POST" class="d-inline"
+                                              onsubmit="return confirm('¿Eliminar este material?')">
+                                            {% csrf_token %}
+                                            <button class="btn btn-sm btn-danger">🗑️</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-muted text-center small">Sin materiales registrados.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+
                     <div class="d-grid gap-2 mt-5">
                         <button type="submit" class="btn btn-info btn-lg fw-bold text-dark shadow">GUARDAR REGISTRO</button>
                         <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary border-0">Cancelar y Volver</a>

@@ -59,7 +59,7 @@ def editar_orden(request, orden_id):
             return redirect("dashboard")
     else:
         form = OrdenTrabajoForm(instance=orden)
-    return render(request, "formulario.html", {"form": form, "titulo": "Editar Orden", "vehiculos_json": json.dumps(list(Vehiculo.objects.values("id", "cliente_id", "marca", "modelo", "patente")))})
+    return render(request, "formulario.html", {"form": form, "titulo": "Editar Orden", "orden": orden, "vehiculos_json": json.dumps(list(Vehiculo.objects.values("id", "cliente_id", "marca", "modelo", "patente")))})
 
 @login_required
 def eliminar_orden(request, orden_id):
@@ -190,7 +190,7 @@ def agregar_material_orden(request, orden_id):
             item = form.save(commit=False)
             item.orden = orden
             item.save()
-            return redirect("ver_orden", orden_id=orden.id)
+            return redirect("editar_orden", orden_id=orden.id)
     else:
         form = MaterialUsadoForm()
     return render(request, "formulario.html", {"form": form, "titulo": "Agregar Material"})
@@ -202,7 +202,7 @@ def editar_material_orden(request, item_id):
         form = MaterialUsadoForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
-            return redirect("ver_orden", orden_id=item.orden.id)
+            return redirect("editar_orden", orden_id=item.orden.id)
     else:
         form = MaterialUsadoForm(instance=item)
     return render(request, "formulario.html", {"form": form, "titulo": "Editar Material"})
@@ -213,7 +213,7 @@ def eliminar_material_orden(request, item_id):
     item = get_object_or_404(MaterialUsado, id=item_id)
     orden_id = item.orden.id
     item.delete()
-    return redirect("ver_orden", orden_id=orden_id)
+    return redirect("editar_orden", orden_id=orden_id)
 
 
 @login_required
