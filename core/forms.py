@@ -93,6 +93,17 @@ class MaterialForm(EstiloBaseForm):
         model = Material
         fields = ['nombre', 'descripcion', 'stock']
 
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre', '').strip()
+        qs = Material.objects.filter(nombre__iexact=nombre)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(
+                f'Ya existe un material con el nombre "{nombre}". Use Editar para modificar su stock.'
+            )
+        return nombre
+
 class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
