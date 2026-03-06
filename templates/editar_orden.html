@@ -38,7 +38,7 @@
 
                     <div class="mt-4 p-3 rounded" style="background-color: #39373d; border: 1px dashed #6a6870;">
                         <label class="text-info fw-bold">📸 Añadir nuevas fotos:</label>
-                        <input type="file" name="fotos_adicionales" multiple class="form-control bg-dark text-white border-secondary" accept="image/*">
+                        <input type="file" name="fotos" multiple class="form-control bg-dark text-white border-secondary" accept="image/*">
                         <div id="image-preview" class="d-flex flex-wrap mt-2"></div>
                     </div>
 
@@ -53,7 +53,7 @@
 </div>
 
 <script>
-    document.querySelector('input[name="fotos_adicionales"]').addEventListener('change', function() {
+    document.querySelector('input[name="fotos"]').addEventListener('change', function() {
         const preview = document.getElementById('image-preview');
         preview.innerHTML = '';
         Array.from(this.files).forEach(file => {
