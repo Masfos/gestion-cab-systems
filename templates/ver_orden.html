@@ -2,11 +2,11 @@
 {% block content %}
 
 <style>
-/* ===== PANTALLA ===== */
+/*  PANTALLA  */
 .icono-print { display: none; }
 .icono-screen { display: inline; }
 
-/* ===== IMPRESIÓN ===== */
+/*  IMPRESIÓN  */
 @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
@@ -51,18 +51,19 @@
     .tabla-print thead tr { background: #eee !important; }
     .tabla-print tbody tr { background: white !important; }
 
-    /* Ocultar emojis en documento de impresión */
+    /* Ocultar emojis */
     .icono-screen { display: none !important; }
     .icono-print { display: inline !important; font-weight: bold; }
 
-    /* Ocultar imágenes en documento de impresión */
+    /* Ocultar imágenes */
     .seccion-imagenes { display: none !important; }
 
     /* Mostrar firma y encabezado de impresión */
     .print-firma { display: block !important; }
     .print-header { display: block !important; }
     .screen-only { display: none !important; }
-    
+
+    /* Espaciado compacto */
     .mb-4 { margin-bottom: 5px !important; }
     .mt-4 { margin-top: 5px !important; }
     .my-4 { margin-top: 5px !important; margin-bottom: 5px !important; }
@@ -79,18 +80,25 @@
         <div class="card shadow-lg mb-4" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
             <div class="card-body p-5">
 
+                {% load static %}
                 <!-- ENCABEZADO IMPRESIÓN -->
-                <div class="print-header" style="border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
+                <div class="print-header" style="border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
                     <table style="width:100%; border:none; border-collapse:collapse;">
                         <tr>
-                            <td style="border:none; vertical-align:top; width:50%;">
+                            <!-- Logo -->
+                            <td style="border:none; vertical-align:middle; width:15%; padding-right:10px;">
+                                <img src="{% static 'img/logo.png' %}" style="width:80px; height:80px; object-fit:contain;">
+                            </td>
+                            <!-- Datos empresa -->
+                            <td style="border:none; vertical-align:middle; width:45%;">
                                 <strong style="font-size:11pt;">CAB Systems</strong><br>
                                 <span style="font-size:8pt;">Equipos, Servicios y Tecnologías Spa.</span><br>
                                 <span style="font-size:8pt;">Av. Pdte. Salvador Allende #690, Antofagasta</span><br>
                                 <span style="font-size:8pt;">contacto@cabsystems.cl | www.cabsystems.cl</span><br>
                                 <span style="font-size:8pt;">RUT: 76.073.202-8</span>
                             </td>
-                            <td style="border:none; text-align:right; vertical-align:top; width:50%;">
+                            <!-- Orden -->
+                            <td style="border:none; text-align:right; vertical-align:middle; width:40%;">
                                 <strong style="font-size:13pt;">ORDEN DE TRABAJO N° {{ orden.id }}</strong><br>
                                 <span style="font-size:9pt;">Estado: <strong>{{ orden.get_estado_display|upper }}</strong></span><br>
                                 <span style="font-size:8pt;">Fecha: {{ orden.fecha_creacion|date:"d/m/Y" }}</span><br>
