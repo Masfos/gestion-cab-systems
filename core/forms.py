@@ -167,3 +167,4 @@ class MaterialUsadoForm(EstiloBaseForm):
         super().__init__(*args, **kwargs)
         self.fields['material'].queryset = Material.objects.order_by('nombre')
         self.fields['material'].label_from_instance = lambda obj: f"{obj.nombre} (Stock: {obj.stock})"
+
