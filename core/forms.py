@@ -72,11 +72,10 @@ class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
         fields = ['cliente', 'patente', 'marca', 'modelo', 'anio',
-                  'serie_vin', 'id_interno', 'horas']
+                  'serie_vin', 'horas']
         labels = {
             'anio': 'Año',
             'serie_vin': 'Serie / VIN',
-            'id_interno': 'ID Interno',
             'horas': 'Horas',
         }
 

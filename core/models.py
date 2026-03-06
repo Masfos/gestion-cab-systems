@@ -26,7 +26,6 @@ class Vehiculo(models.Model):
     patente = models.CharField(max_length=20)
     anio = models.PositiveIntegerField(null=True, blank=True)
     serie_vin = models.CharField(max_length=100, blank=True, null=True)
-    id_interno = models.CharField(max_length=50, blank=True, null=True)
     horas = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
