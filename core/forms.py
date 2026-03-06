@@ -1,6 +1,6 @@
 from django import forms
-from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User, Group
+from django.core.validators import MinValueValidator
 from .models import OrdenTrabajo, Cliente, Vehiculo, Material, MaterialUsado
 
 # --- SUBIDA MÚLTIPLE DE IMÁGENES ---
@@ -30,22 +30,54 @@ class EstiloBaseForm(forms.ModelForm):
             })
 
 class ClienteForm(EstiloBaseForm):
+    tiene_empresa = forms.ChoiceField(
+        choices=[('no', 'No'), ('si', 'Sí')],
+        label='¿Tiene empresa?',
+        widget=forms.Select(attrs={
+            'class': 'form-control bg-dark text-white border-secondary',
+            'style': 'border-radius: 10px; padding: 12px;',
+            'id': 'id_tiene_empresa'
+        })
+    )
+
     class Meta:
         model = Cliente
-        fields = ['nombre', 'rut', 'empresa', 'telefono', 'email']
-        widgets = {
-            'rut': forms.TextInput(attrs={
-                'placeholder': 'Ej: 12345678-9',
-                'maxlength': '12',
-            }),
-        }
+        fields = ['nombre', 'rut', 'telefono', 'email', 'tiene_empresa',
+                  'empresa', 'rut_empresa', 'giro', 'ciudad', 'direccion']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pre-cargar tiene_empresa si ya hay empresa guardada
+        if self.instance and self.instance.pk and self.instance.empresa:
+            self.fields['tiene_empresa'].initial = 'si'
+        else:
+            self.fields['tiene_empresa'].initial = 'no'
+        # Campos empresa opcionales
+        for f in ['empresa', 'rut_empresa', 'giro', 'ciudad', 'direccion']:
+            self.fields[f].required = False
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.cleaned_data.get('tiene_empresa') == 'no':
+            instance.empresa = None
+            instance.rut_empresa = None
+            instance.giro = None
+            instance.ciudad = None
+            instance.direccion = None
+        if commit:
+            instance.save()
+        return instance
 
 class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
-        fields = ['cliente', 'patente', 'marca', 'modelo', 'anio']
+        fields = ['cliente', 'patente', 'marca', 'modelo', 'anio',
+                  'serie_vin', 'id_interno', 'horas']
         labels = {
             'anio': 'Año',
+            'serie_vin': 'Serie / VIN',
+            'id_interno': 'ID Interno',
+            'horas': 'Horas',
         }
 
 class MaterialForm(EstiloBaseForm):
@@ -65,19 +97,21 @@ class MaterialForm(EstiloBaseForm):
 class OrdenTrabajoForm(EstiloBaseForm):
     class Meta:
         model = OrdenTrabajo
-        fields = ['cliente', 'vehiculo', 'descripcion', 'estado']
+        fields = ['cliente', 'vehiculo', 'descripcion', 'observaciones', 'estado']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo...'}),
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describa el trabajo a realizar...'}),
+            'observaciones': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Observaciones del vehículo...'}),
+        }
+        labels = {
+            'observaciones': 'Observaciones del Vehículo',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['cliente'].queryset = Cliente.objects.order_by('-id')
-        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} — {obj.rut} ({obj.empresa})" if obj.empresa else (f"{obj.nombre} — {obj.rut}" if obj.rut else obj.nombre)
-        self.fields['cliente'].widget.attrs.update({'id': 'id_cliente', 'class': 'form-select bg-dark text-white border-secondary select2-cliente'})
+        self.fields['cliente'].label_from_instance = lambda obj: f"{obj.nombre} ({obj.empresa})" if obj.empresa else obj.nombre
         self.fields['vehiculo'].queryset = Vehiculo.objects.order_by('-id')
-        self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre}"
-        self.fields['vehiculo'].widget.attrs.update({'id': 'id_vehiculo', 'class': 'form-select bg-dark text-white border-secondary select2-vehiculo'})
+        self.fields['vehiculo'].label_from_instance = lambda obj: f"{obj.marca} {obj.modelo} [{obj.patente}] - {obj.cliente.nombre} ({obj.cliente.empresa if obj.cliente.empresa else 'Particular'})"
 
 # FORMULARIO PARA REGISTRO DE TRABAJADORES
 class RegistroTrabajadorForm(forms.ModelForm):

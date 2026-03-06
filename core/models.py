@@ -3,41 +3,21 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-
-def validar_rut(rut):
-    rut = rut.strip().replace(".", "").replace("-", "")
-    if not rut[:-1].isdigit():
-        raise ValidationError("El RUT debe contener solo numeros.")
-    if len(rut) < 8 or len(rut) > 9:
-        raise ValidationError("RUT invalido.")
-    cuerpo = rut[:-1]
-    dv = rut[-1].upper()
-    suma = 0
-    multiplo = 2
-    for c in reversed(cuerpo):
-        suma += int(c) * multiplo
-        multiplo = multiplo + 1 if multiplo < 7 else 2
-    resto = 11 - (suma % 11)
-    if resto == 11:
-        dv_esperado = "0"
-    elif resto == 10:
-        dv_esperado = "K"
-    else:
-        dv_esperado = str(resto)
-    if dv != dv_esperado:
-        raise ValidationError("RUT invalido, digito verificador incorrecto.")
-
-
+# Registro cliente
 class Cliente(models.Model):
     nombre = models.CharField(max_length=150)
-    rut = models.CharField(max_length=12, blank=True, null=True, unique=True, validators=[validar_rut])
-    empresa = models.CharField(max_length=150, blank=True, null=True)
+    rut = models.CharField(max_length=12, blank=True, null=True, unique=True)
     telefono = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    # Datos empresa (opcionales)
+    empresa = models.CharField(max_length=150, blank=True, null=True)
+    rut_empresa = models.CharField(max_length=20, blank=True, null=True)
+    giro = models.CharField(max_length=150, blank=True, null=True)
+    ciudad = models.CharField(max_length=100, blank=True, null=True)
+    direccion = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return f"{self.nombre} ({self.empresa})" if self.empresa else self.nombre
-
 
 class Vehiculo(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
@@ -45,6 +25,9 @@ class Vehiculo(models.Model):
     modelo = models.CharField(max_length=100)
     patente = models.CharField(max_length=20)
     anio = models.PositiveIntegerField(null=True, blank=True)
+    serie_vin = models.CharField(max_length=100, blank=True, null=True)
+    id_interno = models.CharField(max_length=50, blank=True, null=True)
+    horas = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         empresa_txt = f" ({self.cliente.empresa})" if self.cliente.empresa else ""
@@ -64,8 +47,17 @@ class OrdenTrabajo(models.Model):
     vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     descripcion = models.TextField()
-    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="ordenes_creadas")
-    modificado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="ordenes_modificadas")
+    observaciones = models.TextField(blank=True, null=True)
+
+    creado_por = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="ordenes_creadas"
+    )
+    modificado_por = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="ordenes_modificadas"
+    )
+
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
@@ -92,7 +84,9 @@ class Material(models.Model):
 
 
 class MaterialUsado(models.Model):
-    orden = models.ForeignKey('OrdenTrabajo', on_delete=models.CASCADE, related_name="materiales_usados")
+    orden = models.ForeignKey(
+        'OrdenTrabajo', on_delete=models.CASCADE, related_name="materiales_usados"
+    )
     material = models.ForeignKey('Material', on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
 

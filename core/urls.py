@@ -37,6 +37,7 @@ urlpatterns = [
 
     # Imagenes
     path('imagen/descargar/<int:imagen_id>/', views.descargar_imagen, name='descargar_imagen'),
+    path('imagen/eliminar/<int:imagen_id>/', views.eliminar_imagen, name='eliminar_imagen'),
     path('ajax/vehiculos/', views.vehiculos_por_cliente, name='ajax_vehiculos'),
     path('materiales/editar/<int:material_id>/', views.editar_material_bodega, name='editar_material_bodega'),
     path('materiales/eliminar/<int:material_id>/', views.eliminar_material, name='eliminar_material_bodega'),

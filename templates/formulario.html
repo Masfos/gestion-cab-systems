@@ -1,42 +1,128 @@
 {% extends "base.html" %}
 {% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<style>
+    label {
+        font-weight: 600; margin-bottom: 8px; display: block;
+        color: #0dcaf0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: #3e4146 !important;
+        border-color: #0dcaf0 !important;
+        box-shadow: 0 0 0 0.25rem rgba(13,202,240,0.2);
+        color: white;
+    }
+    .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #5a5860; }
+    .select2-container--default .select2-selection--single {
+        background-color: #212529; border: 1px solid #6c757d;
+        border-radius: 10px; height: 48px; padding: 8px 12px; color: white;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { color: white; line-height: 28px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 46px; }
+    .select2-dropdown { background-color: #212529; border: 1px solid #6c757d; color: white; }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] { background-color: #0dcaf0; color: #000; }
+    .select2-search__field { background-color: #2c2f33 !important; color: white !important; border: 1px solid #6c757d !important; }
+    .select2-results__option { color: white; padding: 8px 12px; }
+    .select2-container { width: 100% !important; }
+    .seccion-card {
+        background-color: #39373d;
+        border: 1px solid #5a5860;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    .seccion-titulo {
+        color: #0dcaf0;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #5a5860;
+    }
+</style>
+
 <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+    <div class="{% if es_cliente_form %}col-md-11 col-lg-10{% else %}col-md-8 col-lg-6{% endif %}">
         <div class="card shadow-lg border-0" style="background-color: #2c2f33; border-radius: 20px; color: white;">
             <div class="card-body p-5">
                 <h2 class="text-center mb-4 fw-bold text-info" style="letter-spacing: 1px;">{{ titulo }}</h2>
                 <hr class="border-secondary mb-4">
 
-                <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-                <style>
-                    label {
-                        font-weight: 600; margin-bottom: 10px; display: block;
-                        color: #0dcaf0; font-size: 0.9rem; text-transform: uppercase;
-                    }
-                    select option { background: #212529; color: white; }
-                    .form-control:focus, .form-select:focus {
-                        background-color: #3e4146 !important;
-                        border-color: #0dcaf0 !important;
-                        box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
-                        color: white;
-                    }
-                    .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #5a5860; }
-                    .select2-container--default .select2-selection--single {
-                        background-color: #212529; border: 1px solid #6c757d;
-                        border-radius: 10px; height: 48px; padding: 8px 12px; color: white;
-                    }
-                    .select2-container--default .select2-selection--single .select2-selection__rendered { color: white; line-height: 28px; }
-                    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 46px; }
-                    .select2-dropdown { background-color: #212529; border: 1px solid #6c757d; color: white; }
-                    .select2-container--default .select2-results__option--highlighted[aria-selected] { background-color: #0dcaf0; color: #000; }
-                    .select2-search__field { background-color: #2c2f33 !important; color: white !important; border: 1px solid #6c757d !important; }
-                    .select2-results__option { color: white; padding: 8px 12px; }
-                    .select2-container { width: 100% !important; }
-                </style>
-
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
 
+                    {% if es_cliente_form %}
+                    <!-- FORMULARIO CLIENTE EN DOS COLUMNAS -->
+                    <div class="row g-4">
+                        <!-- COLUMNA IZQUIERDA: Datos del cliente -->
+                        <div class="col-md-6">
+                            <div class="seccion-card">
+                                <div class="seccion-titulo">👤 Datos del Cliente</div>
+                                <div class="mb-3">
+                                    <label>{{ form.nombre.label }}</label>
+                                    {{ form.nombre }}
+                                    {% if form.nombre.errors %}<div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.rut.label }}</label>
+                                    {{ form.rut }}
+                                    {% if form.rut.errors %}<div class="text-danger small mt-1">{{ form.rut.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.telefono.label }}</label>
+                                    {{ form.telefono }}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.email.label }}</label>
+                                    {{ form.email }}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.tiene_empresa.label }}</label>
+                                    {{ form.tiene_empresa }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLUMNA DERECHA: Datos de empresa -->
+                        <div class="col-md-6" id="seccion-empresa" style="display:none;">
+                            <div class="seccion-card">
+                                <div class="seccion-titulo">🏢 Datos de la Empresa <span class="text-secondary fw-normal">(opcional)</span></div>
+                                <div class="mb-3">
+                                    <label>{{ form.empresa.label }}</label>
+                                    {{ form.empresa }}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.rut_empresa.label }}</label>
+                                    {{ form.rut_empresa }}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.giro.label }}</label>
+                                    {{ form.giro }}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.ciudad.label }}</label>
+                                    {{ form.ciudad }}
+                                </div>
+                                <div class="mb-3">
+                                    <label>{{ form.direccion.label }}</label>
+                                    {{ form.direccion }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Placeholder cuando no hay empresa -->
+                        <div class="col-md-6" id="seccion-sin-empresa">
+                            <div class="seccion-card d-flex align-items-center justify-content-center" style="min-height: 200px; border-style: dashed;">
+                                <p class="text-secondary text-center small mb-0">Seleccione "Sí" en ¿Tiene empresa?<br>para ingresar los datos de la empresa.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <!-- FORMULARIO GENÉRICO -->
                     {% for field in form %}
                         <div class="mb-4">
                             <label>{{ field.label }}</label>
@@ -46,6 +132,7 @@
                             {% endif %}
                         </div>
                     {% endfor %}
+                    {% endif %}
 
                     {% if titulo == "Nueva Orden" or titulo == "Editar Orden" %}
                     <div class="mb-4">
@@ -99,6 +186,7 @@
                         <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary border-0">Cancelar y Volver</a>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
@@ -109,14 +197,15 @@
 <script>
 $(document).ready(function() {
 
-    if ($('.select2-cliente').length) {
-        $('.select2-cliente').select2({ placeholder: 'Buscar cliente...', allowClear: true });
+    // Select2 para cliente y vehículo
+    if ($('#id_cliente').length) {
+        $('#id_cliente').select2({ placeholder: 'Buscar cliente...', allowClear: true });
     }
-    if ($('.select2-vehiculo').length) {
-        $('.select2-vehiculo').select2({ placeholder: 'Selecciona primero un cliente...', allowClear: true });
+    if ($('#id_vehiculo').length) {
+        $('#id_vehiculo').select2({ placeholder: 'Selecciona primero un cliente...', allowClear: true });
     }
 
-    // Filtro dinámico de vehículos
+    // Filtro dinámico de vehículos por cliente
     $('#id_cliente').on('change', function() {
         const clienteId = $(this).val();
         const $vehiculo = $('#id_vehiculo');
@@ -126,9 +215,9 @@ $(document).ready(function() {
             return;
         }
         $.get('/ajax/vehiculos/', { cliente_id: clienteId }, function(data) {
-            $vehiculo.empty().append('<option value="">Selecciona un vehiculo</option>');
+            $vehiculo.empty().append('<option value="">Selecciona un vehículo</option>');
             if (data.vehiculos.length === 0) {
-                $vehiculo.append('<option value="" disabled>Sin vehiculos registrados</option>');
+                $vehiculo.append('<option value="" disabled>Sin vehículos registrados</option>');
             } else {
                 data.vehiculos.forEach(function(v) {
                     $vehiculo.append('<option value="' + v.id + '">' + v.text + '</option>');
@@ -138,15 +227,28 @@ $(document).ready(function() {
         });
     });
 
-    // Formato RUT automático
-    const rutInput = document.getElementById('id_rut');
+    // Mostrar/ocultar sección empresa
+    function toggleEmpresa() {
+        const val = $('#id_tiene_empresa').val();
+        if (val === 'si') {
+            $('#seccion-empresa').show();
+            $('#seccion-sin-empresa').hide();
+        } else {
+            $('#seccion-empresa').hide();
+            $('#seccion-sin-empresa').show();
+        }
+    }
+    $('#id_tiene_empresa').on('change', toggleEmpresa);
+    toggleEmpresa(); // ejecutar al cargar
+
+    // Formato RUT empresa automático
+    const rutInput = document.getElementById('id_rut_empresa');
     if (rutInput) {
         rutInput.addEventListener('input', function() {
             let val = this.value.replace(/[^0-9kK]/g, '').toUpperCase();
             if (val.length > 1) {
                 const dv = val.slice(-1);
-                let cuerpo = val.slice(0, -1);
-                cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                let cuerpo = val.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
                 this.value = cuerpo + '-' + dv;
             } else {
                 this.value = val;

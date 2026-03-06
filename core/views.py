@@ -77,7 +77,7 @@ def crear_cliente(request):
             return redirect("dashboard")
     else:
         form = ClienteForm()
-    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Cliente"})
+    return render(request, "formulario.html", {"form": form, "titulo": "Nuevo Cliente", "es_cliente_form": True})
 
 @login_required
 def editar_cliente(request, cliente_id):
@@ -89,7 +89,7 @@ def editar_cliente(request, cliente_id):
             return redirect("dashboard")
     else:
         form = ClienteForm(instance=cliente)
-    return render(request, "formulario.html", {"form": form, "titulo": "Editar Cliente"})
+    return render(request, "formulario.html", {"form": form, "titulo": "Editar Cliente", "es_cliente_form": True})
 
 @login_required
 def eliminar_cliente(request, cliente_id):
@@ -264,3 +264,14 @@ def editar_material_bodega(request, material_id):
     else:
         form = MaterialForm(instance=material)
     return render(request, "formulario.html", {"form": form, "titulo": "Editar Material"})
+
+
+@login_required
+def eliminar_imagen(request, imagen_id):
+    if not es_admin(request.user):
+        return HttpResponseForbidden()
+    img = get_object_or_404(ImagenOrden, id=imagen_id)
+    orden_id = img.orden.id
+    img.imagen.delete(save=False)
+    img.delete()
+    return redirect("editar_orden", orden_id=orden_id)

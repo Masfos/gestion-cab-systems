@@ -1,12 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
+
+<style>
+/* ===== ESTILOS PANTALLA ===== */
+.dato-label { color: #6c757d; font-size: 0.8rem; }
+.dato-valor { font-size: 0.95rem; }
+
+/* ===== ESTILOS IMPRESIÓN ===== */
+@media print {
+    nav, .navbar, header, footer,
+    .btn, .no-print, #btn-imprimir,
+    .btn-group { display: none !important; }
+
+    body { background: white !important; color: black !important; font-family: Arial, sans-serif; font-size: 11pt; }
+
+    .card { border: none !important; box-shadow: none !important; background: white !important; color: black !important; }
+    .card-body { padding: 0 !important; }
+    .text-info, .text-warning, .text-secondary, .text-light, .text-muted { color: black !important; }
+    .bg-dark, .table-dark { background: white !important; color: black !important; }
+    .border-secondary { border-color: #ccc !important; }
+    .badge { border: 1px solid #333 !important; color: black !important; background: white !important; }
+    .print-header { display: block !important; }
+    .screen-header { display: none !important; }
+    .table th, .table td { border: 1px solid #333 !important; padding: 4px 8px !important; color: black !important; }
+    .table thead th { background: #eee !important; }
+    .print-firma { display: block !important; margin-top: 40px; }
+    .img-print { max-height: 120px !important; }
+    .no-print-img { display: none !important; }
+
+    .page-break { page-break-before: always; }
+
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+.print-header { display: none; }
+.print-firma { display: none; }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card shadow-lg mb-4" style="background-color: #4a4850; border: 1px solid #5a5860; border-radius: 15px; color: white;">
             <div class="card-body p-5">
 
-                <!-- Encabezado -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <!-- Encabezado pantalla -->
+                <div class="screen-header d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold m-0 text-info">Orden #{{ orden.id }}</h2>
                     <span class="badge fs-5 px-4 py-2
                         {% if orden.estado == 'pendiente' %}bg-warning text-dark
@@ -18,6 +55,26 @@
                         {{ orden.get_estado_display|upper }}
                     </span>
                 </div>
+
+                <!-- Encabezado impresión -->
+                <div class="print-header" style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 16px;">
+                    <table style="width:100%; border:none;">
+                        <tr>
+                            <td style="width:60%; border:none; vertical-align:top;">
+                                <strong style="font-size:14pt;">CAB Systems</strong><br>
+                                <span style="font-size:9pt;">Equipos, Servicios y Tecnologías Spa.</span><br>
+                                <span style="font-size:9pt;">Av. Pdte. Salvador Allende #690, Antofagasta</span><br>
+                                <span style="font-size:9pt;">contacto@cabsystems.cl | www.cabsystems.cl</span>
+                            </td>
+                            <td style="width:40%; text-align:right; border:none; vertical-align:top;">
+                                <strong style="font-size:13pt;">ORDEN DE TRABAJO N° {{ orden.id }}</strong><br>
+                                <span style="font-size:10pt;">Estado: {{ orden.get_estado_display|upper }}</span><br>
+                                <span style="font-size:9pt;">Fecha: {{ orden.fecha_creacion|date:"d/m/Y" }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 <hr class="border-secondary">
 
                 <!-- Cliente y Vehículo -->
@@ -27,7 +84,21 @@
                         <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
                             <p class="mb-1"><strong>{{ orden.cliente.nombre }}</strong></p>
                             {% if orden.cliente.empresa %}
-                            <p class="mb-1 text-warning small">{{ orden.cliente.empresa }}</p>
+                            <p class="mb-1 text-warning small fw-bold">{{ orden.cliente.empresa }}</p>
+                            {% if orden.cliente.rut_empresa %}
+                            <p class="mb-0 small text-secondary">🪪 RUT: {{ orden.cliente.rut_empresa }}</p>
+                            {% endif %}
+                            {% if orden.cliente.giro %}
+                            <p class="mb-0 small text-secondary">📋 Giro: {{ orden.cliente.giro }}</p>
+                            {% endif %}
+                            {% if orden.cliente.direccion %}
+                            <p class="mb-0 small text-secondary">📍 {{ orden.cliente.direccion }}{% if orden.cliente.ciudad %}, {{ orden.cliente.ciudad }}{% endif %}</p>
+                            {% elif orden.cliente.ciudad %}
+                            <p class="mb-0 small text-secondary">🏙️ {{ orden.cliente.ciudad }}</p>
+                            {% endif %}
+                            {% endif %}
+                            {% if orden.cliente.rut %}
+                            <p class="mb-0 small text-secondary">🪪 RUT: {{ orden.cliente.rut }}</p>
                             {% endif %}
                             {% if orden.cliente.telefono %}
                             <p class="mb-0 small text-secondary">📞 {{ orden.cliente.telefono }}</p>
@@ -41,10 +112,11 @@
                         <h5 class="text-info fw-bold">Vehículo</h5>
                         <div class="p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
                             <p class="mb-1"><strong>{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</strong></p>
-                            {% if orden.vehiculo.anio %}
-                            <p class="mb-0 small text-secondary">📅 Año: {{ orden.vehiculo.anio }}</p>
-                            {% endif %}
+                            {% if orden.vehiculo.anio %}<p class="mb-0 small text-secondary">📅 Año: {{ orden.vehiculo.anio }}</p>{% endif %}
                             <p class="mb-0 small text-secondary">🔖 Patente: {{ orden.vehiculo.patente }}</p>
+                            {% if orden.vehiculo.serie_vin %}<p class="mb-0 small text-secondary">🔢 Serie/VIN: {{ orden.vehiculo.serie_vin }}</p>{% endif %}
+                            {% if orden.vehiculo.id_interno %}<p class="mb-0 small text-secondary">🆔 ID Interno: {{ orden.vehiculo.id_interno }}</p>{% endif %}
+                            {% if orden.vehiculo.horas %}<p class="mb-0 small text-secondary">⏱️ Horas: {{ orden.vehiculo.horas }}</p>{% endif %}
                         </div>
                     </div>
                 </div>
@@ -52,8 +124,16 @@
                 <!-- Descripción -->
                 <div class="mt-2 mb-4">
                     <h5 class="text-info fw-bold">Descripción del Trabajo</h5>
-                    <p class="p-3 rounded text-light" style="background-color: #39373d; border: 1px solid #5a5860; white-space: pre-wrap;">{{ orden.descripcion }}</p>
+                    <p class="p-3 rounded text-light" style="background-color: #39373d; border: 1px solid #5a5860; white-space: pre-wrap; min-height: 80px;">{{ orden.descripcion }}</p>
                 </div>
+
+                <!-- Observaciones -->
+                {% if orden.observaciones %}
+                <div class="mt-2 mb-4">
+                    <h5 class="text-info fw-bold">Observaciones del Vehículo</h5>
+                    <p class="p-3 rounded text-light" style="background-color: #39373d; border: 1px solid #5a5860; white-space: pre-wrap; min-height: 80px;">{{ orden.observaciones }}</p>
+                </div>
+                {% endif %}
 
                 <!-- Fechas y Responsables -->
                 <div class="row mb-4">
@@ -103,19 +183,46 @@
                 <div class="d-flex flex-wrap gap-3">
                     {% for img in orden.imagenes.all %}
                     <div class="card bg-dark border-secondary p-2 text-center" style="width: 200px;">
-                        <img src="{{ img.imagen.url }}" class="img-fluid rounded mb-2"
+                        <img src="{{ img.imagen.url }}" class="img-fluid rounded mb-2 img-print"
                             style="height: 140px; width: 100%; object-fit: cover; cursor: pointer;"
                             onclick="window.open(this.src)">
-                        <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm fw-bold">⬇ Descargar</a>
+                        <div class="d-flex gap-1 justify-content-center no-print">
+                            <a href="{% url 'descargar_imagen' img.id %}" class="btn btn-outline-info btn-sm fw-bold">⬇ Descargar</a>
+                            {% if es_admin %}
+                            <form action="{% url 'eliminar_imagen' img.id %}" method="POST" class="d-inline"
+                                  onsubmit="return confirm('¿Eliminar esta imagen?')">
+                                {% csrf_token %}
+                                <button class="btn btn-outline-danger btn-sm">🗑️</button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </div>
                     {% empty %}
                     <p class="text-secondary small">Sin imágenes adjuntas.</p>
                     {% endfor %}
                 </div>
 
-                <!-- Botones -->
-                <div class="text-center mt-5 d-flex justify-content-center gap-3">
+                <!-- Sección firma -->
+                <div class="print-firma" style="margin-top: 60px; border-top: 1px solid #ccc; padding-top: 20px;">
+                    <table style="width: 100%; border: none;">
+                        <tr>
+                            <td style="width: 45%; border: none; padding: 0;">
+                                <p style="margin-bottom: 40px; font-size: 10pt;">Nombre: ________________________________</p>
+                                <div style="border-top: 1px solid #000; width: 80%; padding-top: 4px; font-size: 9pt;">Firma del Cliente</div>
+                            </td>
+                            <td style="width: 10%; border: none;"></td>
+                            <td style="width: 45%; border: none; padding: 0;">
+                                <p style="margin-bottom: 40px; font-size: 10pt;">Técnico: ________________________________</p>
+                                <div style="border-top: 1px solid #000; width: 80%; padding-top: 4px; font-size: 9pt;">Firma del Técnico</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Botones pantalla -->
+                <div class="text-center mt-5 d-flex justify-content-center gap-3 no-print">
                     <a href="{% url 'dashboard' %}" class="btn btn-outline-light px-4">← Volver</a>
+                    <button onclick="window.print()" class="btn btn-outline-warning px-4" id="btn-imprimir">🖨️ Imprimir</button>
                     <a href="{% url 'editar_orden' orden.id %}" class="btn btn-primary px-4">✏️ Editar Orden</a>
                 </div>
 
