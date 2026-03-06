@@ -72,11 +72,11 @@ class VehiculoForm(EstiloBaseForm):
     class Meta:
         model = Vehiculo
         fields = ['cliente', 'patente', 'marca', 'modelo', 'anio',
-                  'serie_vin', 'horas']
+                  'serie_vin', 'kilometraje']
         labels = {
             'anio': 'Año',
             'serie_vin': 'Serie / VIN',
-            'horas': 'Horas',
+            'kilometraje': 'Kilometraje',
         }
 
 class MaterialForm(EstiloBaseForm):
@@ -167,4 +167,3 @@ class MaterialUsadoForm(EstiloBaseForm):
         super().__init__(*args, **kwargs)
         self.fields['material'].queryset = Material.objects.order_by('nombre')
         self.fields['material'].label_from_instance = lambda obj: f"{obj.nombre} (Stock: {obj.stock})"
-
