@@ -92,7 +92,8 @@
                             <td style="border:none; vertical-align:middle; width:55%;">
                                 <strong style="font-size:11pt;">CAB Systems</strong><br>
                                 <span style="font-size:8pt;">Equipos, Servicios y Tecnologías Spa.</span><br>
-                                <span style="font-size:8pt;">Av. Pdte. Salvador Allende #690, Antofagasta — RUT: 76.073.202-8</span><br>
+                                <span style="font-size:8pt;">Av. Pdte. Salvador Allende #690, Antofagasta</span><br>
+                                <span style="font-size:8pt;">RUT: 76.073.202-8</span><br>
                                 <span style="font-size:8pt;">Giro: Aire Acondicionado, Presurización, Hermeticidad y Filtración de Aire</span><br>
                                 <span style="font-size:8pt;">Fono: +56 9 8819 1400 | contacto@cabsystems.cl | www.cabsystems.cl</span>
                             </td>
@@ -127,10 +128,12 @@
                     <div class="col-md-6 mb-4">
                         <h5 class="text-info fw-bold seccion-titulo">Cliente</h5>
                         <div class="dato-box p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
-                            <p class="mb-1 fw-bold">{{ orden.cliente.nombre }}</p>
+                            <!-- Datos de empresa (solo si existe) -->
                             {% if orden.cliente.empresa %}
-                            <p class="mb-1 text-warning small fw-bold">{{ orden.cliente.empresa }}</p>
-                            {% endif %}
+                            <p class="mb-1 fw-bold small text-warning">
+                                <span class="icono-screen">🏢 </span>Datos de Empresa
+                            </p>
+                            <p class="mb-1 fw-bold">{{ orden.cliente.empresa }}</p>
                             {% if orden.cliente.rut_empresa %}
                             <p class="mb-0 small text-secondary">
                                 <span class="icono-screen">🪪 </span><span class="icono-print">RUT Empresa: </span>{{ orden.cliente.rut_empresa }}
@@ -150,6 +153,13 @@
                                 <span class="icono-screen">🏙️ </span><span class="icono-print">Ciudad: </span>{{ orden.cliente.ciudad }}
                             </p>
                             {% endif %}
+                            <hr style="border-color: #5a5860; margin: 8px 0;">
+                            {% endif %}
+                            <!-- Datos particulares del cliente -->
+                            <p class="mb-1 fw-bold small text-info">
+                                <span class="icono-screen">👤 </span>Datos Particulares
+                            </p>
+                            <p class="mb-1 fw-bold">{{ orden.cliente.nombre }}</p>
                             {% if orden.cliente.rut %}
                             <p class="mb-0 small text-secondary">
                                 <span class="icono-screen">🪪 </span><span class="icono-print">RUT: </span>{{ orden.cliente.rut }}
@@ -303,4 +313,3 @@
     </div>
 </div>
 {% endblock %}
-
