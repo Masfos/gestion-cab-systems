@@ -272,6 +272,5 @@ def eliminar_imagen(request, imagen_id):
         return HttpResponseForbidden()
     img = get_object_or_404(ImagenOrden, id=imagen_id)
     orden_id = img.orden.id
-    img.imagen.delete(save=False)
     img.delete()
     return redirect("editar_orden", orden_id=orden_id)
