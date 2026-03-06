@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-/* ===== PANTALLA: emojis visibles ===== */
+/* ===== PANTALLA ===== */
 .icono-print { display: none; }
 .icono-screen { display: inline; }
 
@@ -40,7 +40,7 @@
         color: black !important;
     }
 
-    /* Tabla materiales — fondo blanco */
+    /* Tabla materiales */
     .tabla-print, .tabla-print th, .tabla-print td {
         background: white !important;
         color: black !important;
@@ -51,19 +51,18 @@
     .tabla-print thead tr { background: #eee !important; }
     .tabla-print tbody tr { background: white !important; }
 
-    /* Ocultar emojis, mostrar etiqueta de texto */
+    /* Ocultar emojis en documento de impresión */
     .icono-screen { display: none !important; }
     .icono-print { display: inline !important; font-weight: bold; }
 
-    /* Ocultar imágenes */
+    /* Ocultar imágenes en documento de impresión */
     .seccion-imagenes { display: none !important; }
 
     /* Mostrar firma y encabezado de impresión */
     .print-firma { display: block !important; }
     .print-header { display: block !important; }
     .screen-only { display: none !important; }
-
-    /* Espaciado compacto */
+    
     .mb-4 { margin-bottom: 5px !important; }
     .mt-4 { margin-top: 5px !important; }
     .my-4 { margin-top: 5px !important; margin-bottom: 5px !important; }
@@ -271,16 +270,14 @@
                 </div>
 
                 <!-- FIRMA (solo impresión) -->
-                <div class="print-firma" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 16px;">
+                <div class="print-firma" style="margin-top: 80px; border-top: 1px solid #ccc; padding-top: 10px;">
                     <table style="width:100%; border:none; border-collapse:collapse;">
                         <tr>
                             <td style="border:none; width:45%; padding:0;">
-                                <p style="font-size:9pt; margin-bottom:28px;">Nombre: ________________________________</p>
                                 <div style="border-top:1px solid #000; width:80%; padding-top:3px; font-size:8pt;">Firma del Cliente</div>
                             </td>
                             <td style="border:none; width:10%;"></td>
                             <td style="border:none; width:45%; padding:0;">
-                                <p style="font-size:9pt; margin-bottom:28px;">Técnico: ________________________________</p>
                                 <div style="border-top:1px solid #000; width:80%; padding-top:3px; font-size:8pt;">Firma del Técnico</div>
                             </td>
                         </tr>
