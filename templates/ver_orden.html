@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-/* ===== PANTALLA: emojis visibles ===== */
+/* ===== PANTALLA ===== */
 .icono-print { display: none; }
 .icono-screen { display: inline; }
 
@@ -81,9 +81,9 @@
             <div class="card-body p-5">
 
                 {% load static %}
-                {# ENCABEZADO IMPRESIÓN #}
+                <!-- ENCABEZADO IMPRESIÓN -->
                 <div class="print-header" style="margin-bottom: 12px;">
-                    {# Fila superior: logo + datos empresa + orden #}
+                    <!-- Fila superior: logo + datos empresa + orden -->
                     <table style="width:100%; border:none; border-collapse:collapse; margin-bottom:6px;">
                         <tr>
                             <td style="border:none; vertical-align:middle; width:12%; padding-right:8px;">
@@ -107,7 +107,7 @@
                     <hr style="border:none; border-top:2px solid #000; margin:0;">
                 </div>
 
-                {# ENCABEZADO PANTALLA #}
+                <!-- ENCABEZADO PANTALLA -->
                 <div class="screen-only d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold m-0 text-info">Orden #{{ orden.id }}</h2>
                     <span class="badge fs-5 px-4 py-2
@@ -122,15 +122,34 @@
                 </div>
                 <hr class="border-secondary screen-only">
 
-                {# CLIENTE Y VEHÍCULO #}
+                <!-- CLIENTE Y VEHÍCULO -->
                 <div class="row mt-4">
                     <div class="col-md-6 mb-4">
                         <h5 class="text-info fw-bold seccion-titulo">Cliente</h5>
                         <div class="dato-box p-3 rounded" style="background: #39373d; border: 1px solid #5a5860;">
+                            <!-- Datos personales del cliente -->
                             <p class="mb-1 fw-bold">{{ orden.cliente.nombre }}</p>
-                            {% if orden.cliente.empresa %}
-                            <p class="mb-1 text-warning small fw-bold">{{ orden.cliente.empresa }}</p>
+                            {% if orden.cliente.rut %}
+                            <p class="mb-0 small text-secondary">
+                                <span class="icono-screen">🪪 </span><span class="icono-print">RUT: </span>{{ orden.cliente.rut }}
+                            </p>
                             {% endif %}
+                            {% if orden.cliente.telefono %}
+                            <p class="mb-0 small text-secondary">
+                                <span class="icono-screen">📞 </span><span class="icono-print">Tel: </span>{{ orden.cliente.telefono }}
+                            </p>
+                            {% endif %}
+                            {% if orden.cliente.email %}
+                            <p class="mb-0 small text-secondary">
+                                <span class="icono-screen">✉️ </span><span class="icono-print">Email: </span>{{ orden.cliente.email }}
+                            </p>
+                            {% endif %}
+                            <!-- Datos de empresa (solo si existe) -->
+                            {% if orden.cliente.empresa %}
+                            <p class="mb-1 mt-2 fw-bold small text-warning" style="border-top: 1px solid #5a5860; padding-top: 6px;">
+                                <span class="icono-screen">🏢 </span>Empresa
+                            </p>
+                            <p class="mb-1 fw-bold small">{{ orden.cliente.empresa }}</p>
                             {% if orden.cliente.rut_empresa %}
                             <p class="mb-0 small text-secondary">
                                 <span class="icono-screen">🪪 </span><span class="icono-print">RUT Empresa: </span>{{ orden.cliente.rut_empresa }}
@@ -150,20 +169,6 @@
                                 <span class="icono-screen">🏙️ </span><span class="icono-print">Ciudad: </span>{{ orden.cliente.ciudad }}
                             </p>
                             {% endif %}
-                            {% if orden.cliente.rut %}
-                            <p class="mb-0 small text-secondary">
-                                <span class="icono-screen">🪪 </span><span class="icono-print">RUT: </span>{{ orden.cliente.rut }}
-                            </p>
-                            {% endif %}
-                            {% if orden.cliente.telefono %}
-                            <p class="mb-0 small text-secondary">
-                                <span class="icono-screen">📞 </span><span class="icono-print">Tel: </span>{{ orden.cliente.telefono }}
-                            </p>
-                            {% endif %}
-                            {% if orden.cliente.email %}
-                            <p class="mb-0 small text-secondary">
-                                <span class="icono-screen">✉️ </span><span class="icono-print">Email: </span>{{ orden.cliente.email }}
-                            </p>
                             {% endif %}
                         </div>
                     </div>
@@ -193,7 +198,7 @@
                     </div>
                 </div>
 
-                {# DESCRIPCIÓN Y OBSERVACIONES #}
+                <!-- DESCRIPCIÓN Y OBSERVACIONES -->
                 <div class="row">
                     <div class="col-md-{% if orden.observaciones %}6{% else %}12{% endif %} mb-4">
                         <h5 class="text-info fw-bold seccion-titulo">Descripción del Trabajo</h5>
@@ -207,7 +212,7 @@
                     {% endif %}
                 </div>
 
-                {# FECHAS Y RESPONSABLES #}
+                <!-- FECHAS Y RESPONSABLES -->
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3">
                         <h5 class="text-info fw-bold seccion-titulo">Fechas</h5>
@@ -225,7 +230,7 @@
                     </div>
                 </div>
 
-                {# MATERIALES #}
+                <!-- MATERIALES -->
                 <hr class="border-secondary my-4">
                 <h5 class="text-info fw-bold seccion-titulo mb-3">Materiales y Repuestos</h5>
                 <div class="table-responsive mb-4">
@@ -249,7 +254,7 @@
                     </table>
                 </div>
 
-                {# IMÁGENES (solo pantalla) #}
+                <!-- IMÁGENES (solo pantalla) -->
                 <div class="seccion-imagenes">
                     <hr class="border-secondary my-4">
                     <h5 class="text-info fw-bold mb-3">Evidencia Fotográfica</h5>
@@ -276,7 +281,7 @@
                     </div>
                 </div>
 
-                {# FIRMA (solo impresión) #}
+                <!-- FIRMA (para impresión) -->
                 <div class="print-firma" style="margin-top: 80px; border-top: 1px solid #ccc; padding-top: 10px;">
                     <table style="width:100%; border:none; border-collapse:collapse;">
                         <tr>
@@ -291,7 +296,7 @@
                     </table>
                 </div>
 
-                {# BOTONES PANTALLA #}
+                <!-- BOTONES PANTALLA -->
                 <div class="text-center mt-5 d-flex justify-content-center gap-3 no-print">
                     <a href="{% url 'dashboard' %}" class="btn btn-outline-light px-4">← Volver</a>
                     <button onclick="window.print()" class="btn btn-outline-warning px-4">🖨️ Imprimir</button>
