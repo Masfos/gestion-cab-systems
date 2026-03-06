@@ -2,11 +2,11 @@
 {% block content %}
 
 <style>
-/*  PANTALLA  */
+/* ===== PANTALLA: emojis visibles ===== */
 .icono-print { display: none; }
 .icono-screen { display: inline; }
 
-/*  IMPRESIÓN  */
+/* ===== IMPRESIÓN ===== */
 @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
@@ -40,7 +40,7 @@
         color: black !important;
     }
 
-    /* Tabla materiales */
+    /* Tabla materiales — fondo blanco */
     .tabla-print, .tabla-print th, .tabla-print td {
         background: white !important;
         color: black !important;
@@ -51,7 +51,7 @@
     .tabla-print thead tr { background: #eee !important; }
     .tabla-print tbody tr { background: white !important; }
 
-    /* Ocultar emojis */
+    /* Ocultar emojis, mostrar etiqueta de texto */
     .icono-screen { display: none !important; }
     .icono-print { display: inline !important; font-weight: bold; }
 
@@ -81,24 +81,22 @@
             <div class="card-body p-5">
 
                 {% load static %}
-                <!-- ENCABEZADO IMPRESIÓN -->
-                <div class="print-header" style="border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
-                    <table style="width:100%; border:none; border-collapse:collapse;">
+                {# ENCABEZADO IMPRESIÓN #}
+                <div class="print-header" style="margin-bottom: 12px;">
+                    {# Fila superior: logo + datos empresa + orden #}
+                    <table style="width:100%; border:none; border-collapse:collapse; margin-bottom:6px;">
                         <tr>
-                            <!-- Logo -->
-                            <td style="border:none; vertical-align:middle; width:15%; padding-right:10px;">
-                                <img src="{% static 'img/logo.png' %}" style="width:80px; height:80px; object-fit:contain;">
+                            <td style="border:none; vertical-align:middle; width:12%; padding-right:8px;">
+                                <img src="{% static 'img/logo.png' %}" style="width:75px; height:75px; object-fit:contain;">
                             </td>
-                            <!-- Datos empresa -->
-                            <td style="border:none; vertical-align:middle; width:45%;">
+                            <td style="border:none; vertical-align:middle; width:55%;">
                                 <strong style="font-size:11pt;">CAB Systems</strong><br>
                                 <span style="font-size:8pt;">Equipos, Servicios y Tecnologías Spa.</span><br>
-                                <span style="font-size:8pt;">Av. Pdte. Salvador Allende #690, Antofagasta</span><br>
-                                <span style="font-size:8pt;">contacto@cabsystems.cl | www.cabsystems.cl</span><br>
-                                <span style="font-size:8pt;">RUT: 76.073.202-8</span>
+                                <span style="font-size:8pt;">Av. Pdte. Salvador Allende #690, Antofagasta — RUT: 76.073.202-8</span><br>
+                                <span style="font-size:8pt;">Giro: Aire Acondicionado, Presurización, Hermeticidad y Filtración de Aire</span><br>
+                                <span style="font-size:8pt;">Fono: 55-228 0791 | contacto@cabsystems.cl | www.cabsystems.cl</span>
                             </td>
-                            <!-- Orden -->
-                            <td style="border:none; text-align:right; vertical-align:middle; width:40%;">
+                            <td style="border:none; text-align:right; vertical-align:middle; width:33%;">
                                 <strong style="font-size:13pt;">ORDEN DE TRABAJO N° {{ orden.id }}</strong><br>
                                 <span style="font-size:9pt;">Estado: <strong>{{ orden.get_estado_display|upper }}</strong></span><br>
                                 <span style="font-size:8pt;">Fecha: {{ orden.fecha_creacion|date:"d/m/Y" }}</span><br>
@@ -106,9 +104,10 @@
                             </td>
                         </tr>
                     </table>
+                    <hr style="border:none; border-top:2px solid #000; margin:0;">
                 </div>
 
-                <!-- ENCABEZADO PANTALLA -->
+                {# ENCABEZADO PANTALLA #}
                 <div class="screen-only d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold m-0 text-info">Orden #{{ orden.id }}</h2>
                     <span class="badge fs-5 px-4 py-2
@@ -123,7 +122,7 @@
                 </div>
                 <hr class="border-secondary screen-only">
 
-                <!-- CLIENTE Y VEHÍCULO -->
+                {# CLIENTE Y VEHÍCULO #}
                 <div class="row mt-4">
                     <div class="col-md-6 mb-4">
                         <h5 class="text-info fw-bold seccion-titulo">Cliente</h5>
@@ -194,7 +193,7 @@
                     </div>
                 </div>
 
-                <!-- DESCRIPCIÓN Y OBSERVACIONES -->
+                {# DESCRIPCIÓN Y OBSERVACIONES #}
                 <div class="row">
                     <div class="col-md-{% if orden.observaciones %}6{% else %}12{% endif %} mb-4">
                         <h5 class="text-info fw-bold seccion-titulo">Descripción del Trabajo</h5>
@@ -208,7 +207,7 @@
                     {% endif %}
                 </div>
 
-                <!-- FECHAS Y RESPONSABLES -->
+                {# FECHAS Y RESPONSABLES #}
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3">
                         <h5 class="text-info fw-bold seccion-titulo">Fechas</h5>
@@ -226,7 +225,7 @@
                     </div>
                 </div>
 
-                <!-- MATERIALES -->
+                {# MATERIALES #}
                 <hr class="border-secondary my-4">
                 <h5 class="text-info fw-bold seccion-titulo mb-3">Materiales y Repuestos</h5>
                 <div class="table-responsive mb-4">
@@ -250,7 +249,7 @@
                     </table>
                 </div>
 
-                <!-- IMÁGENES (solo pantalla) -->
+                {# IMÁGENES (solo pantalla) #}
                 <div class="seccion-imagenes">
                     <hr class="border-secondary my-4">
                     <h5 class="text-info fw-bold mb-3">Evidencia Fotográfica</h5>
@@ -277,7 +276,7 @@
                     </div>
                 </div>
 
-                <!-- FIRMA (solo impresión) -->
+                {# FIRMA (solo impresión) #}
                 <div class="print-firma" style="margin-top: 80px; border-top: 1px solid #ccc; padding-top: 10px;">
                     <table style="width:100%; border:none; border-collapse:collapse;">
                         <tr>
@@ -292,7 +291,7 @@
                     </table>
                 </div>
 
-                <!-- BOTONES PANTALLA -->
+                {# BOTONES PANTALLA #}
                 <div class="text-center mt-5 d-flex justify-content-center gap-3 no-print">
                     <a href="{% url 'dashboard' %}" class="btn btn-outline-light px-4">← Volver</a>
                     <button onclick="window.print()" class="btn btn-outline-warning px-4">🖨️ Imprimir</button>
